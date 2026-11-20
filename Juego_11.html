@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 11 · Quiz cronológico · Historia de Cuba</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { background:#eef2f7; font-family:'Segoe UI',Roboto,system-ui,'Noto Sans',sans-serif; padding:clamp(0.75rem,2.5vw,1.5rem); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+        .container { max-width:1100px; width:100%; background:white; border-radius:2rem; box-shadow:0 25px 45px -12px rgba(0,0,0,0.3); overflow:hidden; border-top:6px solid #ce1126; border-bottom:6px solid #002a8f; }
+        .header { background:linear-gradient(135deg,#1e3a5f,#0f2c44); color:white; padding:1.2rem clamp(1rem,4vw,2rem); text-align:center; }
+        .header h1 { font-size:clamp(1.3rem,6vw,1.9rem); }
+        .level-bar { padding:0.8rem clamp(1rem,3vw,2rem); display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; background:#f4f7fc; }
+        .level-btn { padding:0.4rem 1rem; font-size:clamp(0.7rem,3.5vw,0.9rem); border:none; border-radius:2rem; cursor:pointer; font-weight:bold; background:#1e40af; color:white; transition:0.2s; }
+        .level-btn.active { background:#ce1126; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+        .quiz-area { padding:1.5rem clamp(1rem,3vw,2rem); }
+        .question { background:#fef9ef; margin-bottom:1.5rem; padding:1rem; border-radius:1.2rem; border-left:5px solid #ce1126; }
+        .question-text { font-weight:bold; font-size:1rem; margin-bottom:0.8rem; }
+        .options { display:flex; flex-direction:column; gap:0.6rem; margin-left:0.8rem; }
+        .option { display:flex; align-items:center; gap:0.8rem; cursor:pointer; background:white; padding:0.4rem 0.8rem; border-radius:2rem; border:1px solid #ddd; transition:0.1s; }
+        .option:hover { background:#ffecb3; }
+        button { background:#1e40af; color:white; border:none; padding:0.7rem 1.2rem; border-radius:2rem; font-weight:bold; font-size:1rem; cursor:pointer; width:100%; margin-top:1rem; }
+        .result-panel { background:#f0f4fa; border-radius:1.2rem; padding:1rem; margin-top:1.2rem; }
+        .ai-message { background:#e9f0fa; border-radius:1rem; padding:0.8rem; margin-top:1rem; font-size:0.85rem; border-left:4px solid #ce1126; }
+        footer { background:#1e2f3c; color:#cddce9; text-align:center; padding:0.9rem; font-size:0.75rem; }
+        .game-nav { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin:1rem; padding-top:0.5rem; border-top:1px solid #ccc; }
+        .game-nav button { background:#1e40af; width:auto; margin:0; padding:0.4rem 1rem; font-size:0.8rem; }
+        @media (max-width:600px){ .options { margin-left:0; } .question { margin-bottom:1rem; } }
+        @media (orientation:landscape) and (max-height:550px){ .question { margin-bottom:0.8rem; padding:0.6rem; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📅 Quiz cronológico · Historia de Cuba</h1>
+        <p>Selecciona el año correcto de cada hecho histórico</p>
+    </div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (4 eventos)</button>
+        <button class="level-btn" data-level="1">📘 Normal (6 eventos)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (8 eventos)</button>
+    </div>
+    <div class="quiz-area" id="quizArea"></div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_10.html'">◀ Anterior</button>
+        <button onclick="location.href='Juego_12.html'">Siguiente ▶</button>
+    </div>
+    <footer>🤖 IA educativa · Explicación histórica al finalizar · Escuelas Pedagógicas</footer>
+</div>
+
+<script>
+    const eventos = [
+        { nombre: "Grito de Yara", año: 1868, descripcion: "Inicio de la Guerra de los Diez Años (1868-1878), primera guerra por la independencia de Cuba. Liderado por Carlos Manuel de Céspedes." },
+        { nombre: "Pacto del Zanjón", año: 1878, descripcion: "Tratado que puso fin a la Guerra de los Diez Años sin lograr la independencia. La Protesta de Baraguá, liderada por Antonio Maceo, rechazó el pacto." },
+        { nombre: "Guerra de Independencia (1895)", año: 1895, descripcion: "Reinicio de la lucha independentista liderada por José Martí, Máximo Gómez y Antonio Maceo. También conocida como Guerra Necesaria." },
+        { nombre: "Constitución de 1940", año: 1940, descripcion: "Constitución progresista y democrática de Cuba, considerada una de las más avanzadas de su época en el mundo." },
+        { nombre: "Desembarco del Granma", año: 1956, descripcion: "Llegada de Fidel Castro y 81 expedicionarios a Cuba para iniciar la lucha guerrillera contra la dictadura de Batista." },
+        { nombre: "Triunfo de la Revolución", año: 1959, descripcion: "Entrada de las tropas rebeldes a La Habana el 1 de enero, tras el éxodo de Batista. Se consolida el gobierno revolucionario." },
+        { nombre: "Invasión de Bahía de Cochinos", año: 1961, descripcion: "Fracaso de la invasión patrocinada por EE.UU. a través de brigadas anticastristas. Victoria del Ejército cubano." },
+        { nombre: "Crisis de los misiles", año: 1962, descripcion: "Conflicto nuclear entre EE.UU. y la URSS con misiles soviéticos en Cuba. Se resolvió con el acuerdo de retirada mutua." }
+    ];
+
+    const niveles = {
+        0: { eventos: eventos.slice(0,4), nombre: "Fácil", total: 4 },
+        1: { eventos: eventos.slice(0,6), nombre: "Normal", total: 6 },
+        2: { eventos: eventos.slice(0,8), nombre: "Difícil", total: 8 }
+    };
+
+    let currentLevel = 0;
+    let respuestasUsuario = {};
+
+    function generarOpciones(eventoCorrecto, todosEventos) {
+        let otrosAnios = todosEventos.filter(e => e.año !== eventoCorrecto.año).map(e => e.año);
+        let distractores = [...new Set(otrosAnios)].slice(0, 3);
+        while (distractores.length < 3) {
+            let fake = eventoCorrecto.año + (distractores.length + 1) * 5;
+            if (!distractores.includes(fake) && fake !== eventoCorrecto.año) distractores.push(fake);
+        }
+        let opciones = [eventoCorrecto.año, ...distractores];
+        for (let i = opciones.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [opciones[i], opciones[j]] = [opciones[j], opciones[i]];
+        }
+        return opciones;
+    }
+
+    function renderQuiz() {
+        const nivelData = niveles[currentLevel];
+        const eventosNivel = nivelData.eventos;
+        const area = document.getElementById('quizArea');
+        let html = `<form id="quizForm">`;
+        eventosNivel.forEach((ev, idx) => {
+            const opciones = generarOpciones(ev, eventosNivel);
+            const seleccionPrevia = respuestasUsuario[idx];
+            html += `<div class="question"><div class="question-text">📌 ${idx+1}. ¿En qué año ocurrió <strong>${ev.nombre}</strong>?</div><div class="options">`;
+            opciones.forEach(anio => {
+                const checked = (seleccionPrevia == anio) ? 'checked' : '';
+                html += `<label class="option"><input type="radio" name="q${idx}" value="${anio}" ${checked}> ${anio}</label>`;
+            });
+            html += `</div><div id="expli-${idx}" style="font-size:0.85rem; margin-top:8px; color:#2c5282;"></div></div>`;
+        });
+        html += `<button type="button" id="calificarBtn">📊 Calificar y ver contexto histórico</button></form><div id="resultadoPanel" class="result-panel"></div><div class="ai-message" id="aiMessage">💡 Haz clic en 'Calificar' para recibir retroalimentación de la IA.</div>`;
+        area.innerHTML = html;
+
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const name = e.target.name;
+                const idx = parseInt(name.substring(1));
+                respuestasUsuario[idx] = parseInt(e.target.value);
+            });
+        });
+
+        document.getElementById('calificarBtn')?.addEventListener('click', () => calificar(eventosNivel));
+    }
+
+    function calificar(eventosNivel) {
+        let aciertos = 0;
+        const total = eventosNivel.length;
+        for (let i = 0; i < total; i++) {
+            const ev = eventosNivel[i];
+            const userResp = respuestasUsuario[i];
+            const esCorrecto = (userResp === ev.año);
+            if (esCorrecto) aciertos++;
+            const explDiv = document.getElementById(`expli-${i}`);
+            if (explDiv) {
+                explDiv.innerHTML = esCorrecto ? `✅ Correcto. ${ev.descripcion}` : `❌ Incorrecto. El año correcto es ${ev.año}. ${ev.descripcion}. Tu respuesta: ${userResp || '(sin responder)'}`;
+            }
+        }
+        const porcentaje = Math.round((aciertos/total)*100);
+        const panel = document.getElementById('resultadoPanel');
+        let mensaje = "";
+        if (porcentaje === 100) mensaje = "🏆 ¡Perfecto! Dominas la cronología histórica de Cuba.";
+        else if (porcentaje >= 70) mensaje = "👍 ¡Muy bien! Tienes un buen conocimiento de las fechas clave. Repasa los eventos que fallaste para mejorar.";
+        else mensaje = "📚 Sigue practicando. La cronología es fundamental para entender los procesos históricos. Revisa las explicaciones.";
+        panel.innerHTML = `<h3 style="color:#002a8f">📊 Puntuación: ${aciertos}/${total} (${porcentaje}%)</h3><p>${mensaje}</p>`;
+        const msgDiv = document.getElementById('aiMessage');
+        msgDiv.innerHTML = `🤖 IA: ${aciertos === total ? '¡Excelente trabajo histórico!' : 'La IA recomienda repasar las guerras de independencia y la Revolución Cubana para consolidar las fechas.'}`;
+    }
+
+    function setLevel(level) {
+        currentLevel = level;
+        respuestasUsuario = {};
+        renderQuiz();
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            if (parseInt(btn.getAttribute('data-level')) === level) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        adaptativeScreen();
+    }
+
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLevel(parseInt(btn.getAttribute('data-level'))));
+    });
+
+    function adaptativeScreen() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        if (width < 480) document.body.style.padding = '0.6rem';
+        else if (width < 768) document.body.style.padding = '1rem';
+        else document.body.style.padding = '1.5rem';
+        const questions = document.querySelectorAll('.question');
+        if (height < 550 && width > height) questions.forEach(q => q.style.marginBottom = '0.8rem');
+        else questions.forEach(q => q.style.marginBottom = '1.5rem');
+    }
+    window.addEventListener('resize', adaptativeScreen);
+    window.addEventListener('orientationchange', () => setTimeout(adaptativeScreen, 30));
+
+    setLevel(0);
+    adaptativeScreen();
+</script>
+</body>
+</html>

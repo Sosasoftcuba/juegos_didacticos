@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 1 · Quiz de figuras literarias · José Martí</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #eef2f7; font-family: 'Segoe UI', Roboto, sans-serif; padding: clamp(0.75rem, 2.5vw, 1.5rem); min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .container { max-width: 1100px; width: 100%; background: white; border-radius: 2rem; box-shadow: 0 25px 45px -12px rgba(0,0,0,0.3); overflow: hidden; border-top: 6px solid #ce1126; border-bottom: 6px solid #002a8f; }
+        .header { background: linear-gradient(135deg, #1e3a5f, #0f2c44); color: white; padding: 1.2rem clamp(1rem, 4vw, 2rem); text-align: center; }
+        .header h1 { font-size: clamp(1.3rem, 6vw, 1.9rem); }
+        .level-bar { padding: 0.8rem clamp(1rem, 3vw, 2rem); display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; background: #f4f7fc; }
+        .level-btn { padding: 0.4rem 1rem; font-size: clamp(0.7rem, 3.5vw, 0.9rem); border: none; border-radius: 2rem; cursor: pointer; font-weight: bold; background: #e2e8f0; transition: 0.2s; }
+        .level-btn.active { background: #ce1126; color: white; }
+        .quiz-area { padding: 1.5rem clamp(1rem, 3vw, 2rem); }
+        .question { background: #fef9ef; margin-bottom: 1.5rem; padding: 1rem; border-radius: 1.2rem; border-left: 5px solid #ce1126; }
+        .question-text { font-weight: bold; font-size: 1rem; margin-bottom: 0.8rem; }
+        .options { display: flex; flex-direction: column; gap: 0.6rem; margin-left: 0.8rem; }
+        .option { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; background: white; padding: 0.4rem 0.8rem; border-radius: 2rem; border: 1px solid #ddd; }
+        .option:hover { background: #ffecb3; }
+        button { background: #002a8f; color: white; border: none; padding: 0.7rem 1.2rem; border-radius: 2rem; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 1rem; }
+        .result-panel { background: #f0f4fa; border-radius: 1.2rem; padding: 1rem; margin-top: 1.2rem; }
+        .ai-message { background: #e9f0fa; border-radius: 1rem; padding: 0.8rem; margin-top: 1rem; font-size: 0.85rem; border-left: 4px solid #ce1126; }
+        footer { background: #1e2f3c; color: #cddce9; text-align: center; padding: 0.9rem; font-size: 0.75rem; }
+        .game-nav { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin: 1rem; padding-top: 0.5rem; border-top: 1px solid #ccc; }
+        .game-nav button { background: #2c5282; width: auto; margin: 0; padding: 0.4rem 1rem; font-size: 0.8rem; }
+        @media (max-width:600px){ .options { margin-left: 0; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header"><h1>📖 Figuras literarias en José Martí</h1><p>Metáforas, personificaciones y aprendizaje con IA</p></div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (4)</button>
+        <button class="level-btn" data-level="1">📘 Normal (6)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (8)</button>
+    </div>
+    <div class="quiz-area" id="quizArea"></div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_20.html'">◀ Anterior</button>
+        <button onclick="location.href='Juego_02.html'">Siguiente ▶</button>
+    </div>
+    <footer>🤖 IA educativa · Fragmentos reales y verosímiles de la obra martiana</footer>
+</div>
+<script>
+    const bancoPreguntas = [
+        { texto: "En “Cultivo una rosa blanca”, la frase “cultivo una rosa blanca” es una metáfora de:", opciones: ["La amistad sincera","La pureza del alma","La patria libre","El amor romántico"], correcta: "A", explicacion: "Metáfora: la rosa blanca representa la amistad sincera." },
+        { texto: "“El sol, cual bravo atleta, salta de una vez sobre los montes”. ¿Qué figura predomina?", opciones: ["Metáfora","Personificación","Hipérbole","Símil"], correcta: "B", explicacion: "Personificación." },
+        { texto: "“Los hombres son estrellas que alumbran caminos”. Esta expresión es una:", opciones: ["Personificación","Metáfora pura","Comparación","Hipérbaton"], correcta: "B", explicacion: "Metáfora." },
+        { texto: "“La noche tiembla de frío y el viento llora recuerdos”. La figura literaria es:", opciones: ["Metáfora","Personificación","Onomatopeya","Sinestesia"], correcta: "B", explicacion: "Personificación." },
+        { texto: "¿Cuál de los siguientes es un recurso fónico utilizado por Martí en ‘Dos patrias’?", opciones: ["Aliteración","Hipérbole","Epíteto","Anáfora"], correcta: "A", explicacion: "Aliteración." },
+        { texto: "“La palabra es un ave que vuela de pecho en pecho”. Esta frase contiene:", opciones: ["Metáfora","Personificación","Paradoja","Metonimia"], correcta: "A", explicacion: "Metáfora." },
+        { texto: "“El mar cansado besa la orilla”. La personificación está en:", opciones: ["El mar cansado","besa la orilla","ambas","ninguna"], correcta: "C", explicacion: "Ambas." },
+        { texto: "“La libertad es un sol que no conoce ocaso”. La identificación de libertad con sol es:", opciones: ["Símil","Personificación","Metáfora","Alegoría"], correcta: "C", explicacion: "Metáfora." }
+    ];
+    const niveles = { 0: { preguntas: bancoPreguntas.slice(0,4) }, 1: { preguntas: bancoPreguntas.slice(0,6) }, 2: { preguntas: bancoPreguntas.slice(0,8) } };
+    let currentLevel = 0, respuestasUsuario = {};
+    function renderQuiz() {
+        const preguntas = niveles[currentLevel].preguntas, area = document.getElementById('quizArea');
+        let html = `<form id="quizForm">`;
+        preguntas.forEach((p, idx) => {
+            const letras = ['A','B','C','D'];
+            html += `<div class="question"><div class="question-text">${idx+1}. ${p.texto}</div><div class="options">`;
+            p.opciones.forEach((opt, optIdx) => { const letra = letras[optIdx]; html += `<label class="option"><input type="radio" name="q${idx}" value="${letra}" ${respuestasUsuario[idx]===letra?'checked':''}><strong>${letra}.</strong> ${opt}</label>`; });
+            html += `</div><div id="expli-${idx}" style="font-size:0.85rem; margin-top:8px;"></div></div>`;
+        });
+        html += `<button type="button" id="calificarBtn">✅ Calificar</button></form><div id="resultadoPanel" class="result-panel"></div><div class="ai-message" id="aiMessage">💡 Haz clic en Calificar.</div>`;
+        area.innerHTML = html;
+        document.querySelectorAll('input[type="radio"]').forEach(radio => radio.addEventListener('change', (e) => { const idx = parseInt(e.target.name.substring(1)); respuestasUsuario[idx] = e.target.value; }));
+        document.getElementById('calificarBtn')?.addEventListener('click', () => calificar(preguntas));
+    }
+    function calificar(preguntas) { let aciertos=0; preguntas.forEach((p,i)=>{ const ok=(respuestasUsuario[i]===p.correcta); if(ok) aciertos++; document.getElementById(`expli-${i}`).innerHTML = ok ? `✅ Correcto. ${p.explicacion}` : `❌ Incorrecto. Correcta: ${p.correcta}. ${p.explicacion} Tu respuesta: ${respuestasUsuario[i]||'(sin responder)'}`; }); const porcentaje=Math.round((aciertos/preguntas.length)*100); document.getElementById('resultadoPanel').innerHTML=`<h3 style="color:#002a8f">📊 Puntuación: ${aciertos}/${preguntas.length} (${porcentaje}%)</h3>`; document.getElementById('aiMessage').innerHTML=`🤖 IA: ${aciertos===preguntas.length?'Perfecto.': 'Sigue practicando.'}`; }
+    function setLevel(level) { currentLevel=level; respuestasUsuario={}; renderQuiz(); document.querySelectorAll('.level-btn').forEach(btn=>{ if(parseInt(btn.dataset.level)===level) btn.classList.add('active'); else btn.classList.remove('active'); }); adaptativeScreen(); }
+    document.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>setLevel(parseInt(btn.dataset.level))));
+    function adaptativeScreen() { const w=window.innerWidth; document.body.style.padding = w<480?'0.6rem':(w<768?'1rem':'1.5rem'); const q=document.querySelectorAll('.question'); if(window.innerHeight<550 && window.innerWidth>window.innerHeight) q.forEach(qq=>qq.style.marginBottom='0.8rem'); else q.forEach(qq=>qq.style.marginBottom='1.5rem'); }
+    window.addEventListener('resize',adaptativeScreen); window.addEventListener('orientationchange',()=>setTimeout(adaptativeScreen,30));
+    setLevel(0); adaptativeScreen();
+</script>
+</body>
+</html>

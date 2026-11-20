@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Sistema de Juegos Didácticos con IA · Escuelas Pedagógicas</title>
+    <style>
+        /* ========== ESTILOS PRINCIPALES (basados en Juego_08) ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #eef2f7;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            padding: clamp(0.75rem, 3vw, 1.5rem);
+            min-height: 100vh;
+        }
+
+        .master-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            border-top: 6px solid #ce1126;   /* rojo cubano */
+            border-bottom: 6px solid #002a8f; /* azul profundo */
+        }
+
+        /* Cabecera con gradiente y colores patrios */
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2c44 100%);
+            color: white;
+            padding: 1.5rem clamp(1rem, 5vw, 2rem);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+
+        .header h1 span {
+            background: #d4af37;
+            padding: 0.2rem 1rem;
+            border-radius: 60px;
+            font-size: clamp(0.8rem, 4vw, 1.2rem);
+            color: #1e3a5f;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: clamp(0.9rem, 4vw, 1.1rem);
+            margin-top: 0.6rem;
+            opacity: 0.95;
+        }
+
+        /* Barra de filtro básica (por si se desea ampliar) */
+        .toolbar {
+            background: #f8fafc;
+            padding: 0.8rem clamp(1rem, 4vw, 2rem);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .toolbar button {
+            background: #2c5282;
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.15s;
+            touch-action: manipulation;
+        }
+
+        .toolbar button:active {
+            transform: scale(0.96);
+        }
+
+        /* Cuadrícula de juegos */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem clamp(1rem, 4vw, 2rem);
+        }
+
+        /* Tarjeta de cada juego (estilo flashcards) */
+        .game-card {
+            background: #fffef7;
+            border-radius: 1.5rem;
+            border: 1px solid #ede3cf;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            touch-action: manipulation;
+        }
+
+        .game-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #fef9ef, #fff);
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 2px solid #ce1126;
+        }
+
+        .card-header .emoji {
+            font-size: 2.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.3rem;
+            margin: 0.5rem 0;
+            color: #1e3a5f;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-body p {
+            font-size: 0.9rem;
+            color: #334155;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-right: 0.4rem;
+            color: #1e293b;
+        }
+
+        .level-badge.easy { background: #b8e1b0; color: #14532d; }
+        .level-badge.normal { background: #ffe0b5; color: #9b2c1d; }
+        .level-badge.hard { background: #f5b7a8; color: #7f1a0c; }
+
+        footer {
+            background: #1e2f3c;
+            color: #cddce9;
+            text-align: center;
+            padding: 1rem;
+            font-size: clamp(0.7rem, 3vw, 0.85rem);
+        }
+
+        footer a {
+            color: #ffd966;
+            text-decoration: none;
+        }
+
+        @media (max-width: 640px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .card-header h2 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 550px) {
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="master-container">
+    <div class="header">
+        <h1>📚 Sistema de Juegos Didácticos con IA <span>20 Juegos Interactivos</span></h1>
+        <p>🎓 Aprendizaje Colaborativo · Escuelas Pedagógicas · Lengua Española e Historia de Cuba</p>
+    </div>
+    <div class="toolbar">
+        <button id="resetAllBtn" style="background: #9b2c1d;">🔄 Reiniciar progreso (local)</button>
+    </div>
+    <div class="games-grid" id="gamesGrid">
+        <!-- Los 20 juegos se generarán dinámicamente con JavaScript -->
+    </div>
+    <footer>
+        · 🇨🇺 Proyecto Sectorial · Simulación de Inteligencia Artificial como apoyo al aprendizaje · MSc. Claudia Maria de los Santos · 
+        <a href="https://www.facebook.com/sosasoftcuba.cu" style="color:#ffd966;">Visitar Foros en Linea</a>
+    </footer>
+</div>
+
+<script>
+    // ==================== LISTA DE LOS 20 JUEGOS ====================
+    // Cada juego tiene: número, título, descripción, archivo (ruta relativa),
+    // niveles (fácil, normal, difícil) con cantidad de preguntas aprox.
+    // Nota: los archivos ya existen con nombres Juego_01.html ... Juego_20.html
+    // Se asume que están en la misma carpeta que este index.
+    const games = [
+        { num: 1, title: "📖 Juego:1 Figuras literarias en José Martí", desc: "Quiz de metáforas, personificaciones y otros recursos en fragmentos martianos.", levels: { easy: 4, normal: 6, hard: 8 }, file: "Juego_01.html" },
+        { num: 2, title: "🔍 Juego:2 Sopa de letras: Mov. literarios", desc: "Encuentra corrientes literarias desde el Romanticismo hasta el Vanguardismo.", levels: { easy: 5, normal: 8, hard: 12 }, file: "Juego_02.html" },
+        { num: 3, title: "🎴 Juego:3 Flashcards de gramática", desc: "Verdadero o falso sobre sustantivos, adjetivos, verbos y reglas gramaticales.", levels: { easy: 20, normal: 40, hard: 60 }, file: "Juego_03.html" },
+        { num: 4, title: "🗣️ Juego:4 Encuentro de monitores pedagógicos", desc: "30 voces literarias de Cuba · Debate sobre identidad y educación.", levels: { easy: 10, normal: 20, hard: 30 }, file: "Juego_04.html" },
+        { num: 5, title: "📜 Juego:5 Línea del tiempo de la poesía cubana", desc: "Ordena hitos poéticos de Cuba, desde 1608 hasta la actualidad.", levels: { easy: 10, normal: 20, hard: 30 }, file: "Juego_05.html" },  // Nota: existe Juego_05b.html que es la línea del tiempo
+        { num: 6, title: "✍️ Juego:6 Ortografía contextualizada", desc: "Ejercicios de tildes, puntuación y mayúsculas en textos literarios.", levels: { easy: 4, normal: 6, hard: 8 }, file: "Juego_06.html" },
+        { num: 7, title: "📚 Juego:7 Sopa de letras: Autores cubanos", desc: "Encuentra a Martí, Guillén, Loynaz y Carpentier.", levels: { easy: 4, normal: 4, hard: 4 }, file: "Juego_07.html" },
+        { num: 8, title: "🎭 Juego:8 Flashcards de recursos expresivos", desc: "Estudia metáfora, personificación, hipérbole, etc. con ejemplos y modo quiz.", levels: { easy: 10, normal: 20, hard: 30 }, file: "Juego_08.html" },
+        { num: 9, title: "📖 Juego:9 Juego narrativo con IA", desc: "Continúa cuentos iniciados por 30 autores cubanos y recibe retroalimentación.", levels: { easy: 5, normal: 10, hard: 20 }, file: "Juego_09.html" },
+        { num: 10, title: "🇨🇺 Juego:10 Debate simulado: Identidad nacional", desc: "Personajes históricos dialogan sobre literatura y cultura cubana.", levels: { easy: 6, normal: 12, hard: 18 }, file: "Juego_10.html" },
+        { num: 11, title: "📅 Juego:11 Quiz cronológico de Historia de Cuba", desc: "Ordena eventos históricos desde el Grito de Yara hasta la Revolución.", levels: { easy: 4, normal: 6, hard: 8 }, file: "Juego_11.html" },
+        { num: 12, title: "⏳ Juego:12 Línea del tiempo: Guerras de Independencia", desc: "Arrastra los eventos a su posición cronológica correcta.", levels: { easy: 5, normal: 5, hard: 5 }, file: "Juego_12.html" },
+        { num: 13, title: "🃏 Juego:13 Flashcards: Personajes históricos", desc: "Conoce a José Martí, Céspedes, Maceo, Mariana Grajales y más.", levels: { easy: 4, normal: 6, hard: 6 }, file: "Juego_13.html" },
+        { num: 14, title: "📜 Juego:14 Línea del tiempo de la poesía cubana (II)", desc: "Versión interactiva con preguntas sobre poetas y obras.", levels: { easy: 10, normal: 20, hard: 30 }, file: "Juego_14.html" },
+        { num: 15, title: "🇨🇺 Juego:15 Sopa de letras: Conceptos históricos", desc: "Independencia, república, soberanía, abolición y más.", levels: { easy: 5, normal: 10, hard: 15 }, file: "Juego_15.html" },
+        { num: 16, title: "🏫 Juego:16 Debate: Educación e independencia", desc: "Céspedes, Martí, Maceo y Mariana Grajales discuten sobre enseñanza.", levels: { easy: 4, normal: 6, hard: 6 }, file: "Juego_16.html" },
+        { num: 17, title: "🇨🇺 Juego:17 Símbolos patrios de Cuba", desc: "Sopa de letras + Verdadero/Falso sobre bandera, escudo, himno, flor nacional, etc.", levels: { easy: 5, normal: 12, hard: 25 }, file: "Juego_17.html" },  // dos partes, usamos la sopa
+        { num: 18, title: "🏛️ Juego:18 Cabildo abierto virtual", desc: "Simulación política: defiende posturas independentistas con apoyo de IA.", levels: { easy: 4, normal: 4, hard: 4 }, file: "Juego_18.html" },
+        { num: 19, title: "🔮 Juego:19 Narrativa histórica interactiva", desc: "Escenarios alternativos de la independencia cubana. ¿Qué hubiera pasado si...?", levels: { easy: 2, normal: 2, hard: 2 }, file: "Juego_19.html" },
+        { num: 20, title: "🎓 Juego:20 Debate: Educación para la independencia", desc: "Martí, Maceo y Mariana Grajales responden preguntas pedagógicas.", levels: { easy: 3, normal: 3, hard: 3 }, file: "Juego_20.html" }
+    ];
+
+    // ========== FUNCIÓN PARA GENERAR LAS TARJETAS ==========
+    function renderGames() {
+        const grid = document.getElementById('gamesGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        games.forEach(game => {
+            // Construimos los badges de niveles
+            const easyBadge = `<span class="level-badge easy">🌱 Fácil (${game.levels.easy} preguntas)</span>`;
+            const normalBadge = `<span class="level-badge normal">📘 Normal (${game.levels.normal} preguntas)</span>`;
+            const hardBadge = `<span class="level-badge hard">🔥 Difícil (${game.levels.hard} preguntas)</span>`;
+            
+            const card = document.createElement('a');
+            card.href = game.file;
+            card.className = 'game-card';
+            // Para que abra en la misma pestaña (por defecto)
+            card.target = '_self';
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="emoji">🎮</div>
+                    <h2>${game.title}</h2>
+                </div>
+                <div class="card-body">
+                    <p>${game.desc}</p>
+                    <div style="margin-top: 12px;">
+                        ${easyBadge} ${normalBadge} ${hardBadge}
+                    </div>
+                    <div style="margin-top: 10px; font-size:0.7rem; color:#2c5282;">
+                        ⚡ Niveles adaptativos según número de preguntas
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // ========== BORRAR PROGRESO LOCAL (por si se guardan puntuaciones en el futuro) ==========
+    document.getElementById('resetAllBtn')?.addEventListener('click', () => {
+        if (confirm('¿Deseas reiniciar todo el progreso guardado en el navegador? Esto borrará puntuaciones y configuraciones locales.')) {
+            localStorage.clear();
+            alert('Progreso reiniciado. Los juegos volverán a su estado inicial.');
+        }
+    });
+
+    // ========== BLOQUE ADAPTATIVE_SCREEN (para ajustes responsivos) ==========
+    function adaptativeScreen() {
+        const width = window.innerWidth;
+        // Ajuste de padding del body
+        if (width < 480) document.body.style.padding = '0.6rem';
+        else if (width < 768) document.body.style.padding = '1rem';
+        else document.body.style.padding = '1.5rem';
+        
+        // Ajuste adicional para la cuadrícula en landscape
+        const grid = document.querySelector('.games-grid');
+        if (grid && window.innerHeight < 550 && window.innerWidth > window.innerHeight) {
+            grid.style.gap = '0.8rem';
+        } else if (grid) {
+            grid.style.gap = '1.5rem';
+        }
+    }
+    
+    window.addEventListener('resize', adaptativeScreen);
+    window.addEventListener('orientationchange', () => setTimeout(adaptativeScreen, 30));
+    
+    // Inicializar
+    renderGames();
+    adaptativeScreen();
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 18 · Cabildo abierto virtual · Simulación política</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { background:#eef2f7; font-family:'Segoe UI',Roboto,system-ui,-apple-system,sans-serif; padding:clamp(0.75rem,3vw,1.5rem); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+        .container { max-width:1200px; width:100%; background:white; border-radius:2rem; box-shadow:0 25px 45px -12px rgba(0,0,0,0.3); overflow:hidden; border-top:6px solid #ce1126; border-bottom:6px solid #002a8f; }
+        .header { background:linear-gradient(135deg,#1e3a5f,#0f2c44); color:white; padding:1.2rem clamp(1rem,4vw,2rem); text-align:center; }
+        .header h1 { font-size:clamp(1.3rem,6vw,1.9rem); }
+        .level-bar { padding:0.8rem clamp(1rem,3vw,2rem); display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; background:#f4f7fc; }
+        .level-btn { padding:0.4rem 1rem; font-size:clamp(0.7rem,3.5vw,0.9rem); border:none; border-radius:2rem; cursor:pointer; font-weight:bold; background:#1e40af; color:white; transition:0.2s; }
+        .level-btn.active { background:#ce1126; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+        .game-area { display:flex; flex-wrap:wrap; gap:1.5rem; padding:1.5rem clamp(1rem,3vw,2rem); }
+        .characters-panel { flex:1.2; min-width:240px; background:#fef9ef; border-radius:1.5rem; padding:1rem; border:1px solid #ede3cf; }
+        .debate-panel { flex:2; min-width:280px; background:#fffcf5; border-radius:1.5rem; padding:1rem; border:1px solid #ede3cf; }
+        .character-card { background:white; margin:0.8rem 0; padding:0.8rem; border-radius:1rem; cursor:pointer; border-left:5px solid #ce1126; transition:0.1s; touch-action:manipulation; }
+        .character-card.selected { background:#ffecb3; border-left-color:#002a8f; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+        .character-name { font-weight:bold; font-size:1rem; }
+        .character-desc { font-size:0.8rem; color:#4a5568; }
+        .topic-selector { margin:1rem 0; }
+        select, textarea { width:100%; padding:0.6rem; border-radius:2rem; border:1px solid #dbc6a0; font-family:inherit; font-size:0.9rem; background:white; }
+        textarea { border-radius:1rem; resize:vertical; }
+        button { background:#1e40af; color:white; border:none; padding:0.6rem 1rem; border-radius:2rem; font-weight:bold; cursor:pointer; margin:0.5rem 0; width:100%; font-size:clamp(0.8rem,3.5vw,0.9rem); transition:0.2s; touch-action:manipulation; }
+        button:active { transform:scale(0.96); }
+        .ia-feedback { background:#e9f0fa; border-radius:1rem; padding:0.8rem; margin-top:1rem; font-size:0.9rem; border-left:4px solid #ce1126; }
+        .history { background:#fef7e8; border-radius:1rem; padding:0.8rem; margin-top:1rem; max-height:220px; overflow-y:auto; font-size:0.85rem; }
+        footer { background:#1e2f3c; color:#cddce9; text-align:center; padding:0.9rem; font-size:0.75rem; }
+        .game-nav { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin:1rem; padding-top:0.5rem; border-top:1px solid #ccc; }
+        .game-nav button { background:#1e40af; width:auto; margin:0; padding:0.4rem 1rem; font-size:0.8rem; }
+        @media (max-width:750px){ .game-area { flex-direction:column; } }
+        @media (orientation:landscape) and (max-height:550px){ .history { max-height:140px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏛️ Cabildo abierto virtual · Simulación política</h1>
+        <p>Defiende posturas históricas sobre independencia, autonomía o anexión con apoyo de IA</p>
+    </div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (2 personajes · 1 tema)</button>
+        <button class="level-btn" data-level="1">📘 Normal (4 personajes · 3 temas)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (6 personajes · 5 temas)</button>
+    </div>
+    <div class="game-area">
+        <div class="characters-panel">
+            <h3>🎭 Personajes históricos</h3>
+            <div id="charactersList"></div>
+            <div class="topic-selector">
+                <label>📜 Tema de debate:</label>
+                <select id="topicSelect"></select>
+            </div>
+        </div>
+        <div class="debate-panel">
+            <h3>✍️ Tu argumento (como el personaje)</h3>
+            <textarea id="argumentInput" rows="4" placeholder="Escribe aquí tu discurso para el cabildo abierto..."></textarea>
+            <button id="submitBtn">🤖 Enviar y recibir análisis de la IA</button>
+            <div id="iaFeedback" class="ia-feedback">💡 La IA te ayudará a construir un discurso histórico coherente.</div>
+            <div class="history" id="historyLog"><p><em>Registro del cabildo</em></p></div>
+        </div>
+    </div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_17.html'">◀ Anterior</button>
+        <button onclick="location.href='Juego_19.html'">Siguiente ▶</button>
+    </div>
+    <footer>✨ Basado en debates independentistas del siglo XIX · IA didáctica · Escuelas Pedagógicas</footer>
+</div>
+
+<script>
+    const nivel0 = {
+        characters: [
+            { name: "Carlos Manuel de Céspedes", desc: "Padre de la Patria, iniciador del Grito de Yara.", postura: "Independencia total, abolir esclavitud de inmediato." },
+            { name: "Tomás Estrada Palma", desc: "Primer presidente de la República (1902-1906).", postura: "Independencia con organización republicana y gradualismo." }
+        ],
+        topics: [ { name: "¿Independencia inmediata o autonomía pactada?", expectedKeywords: ["independencia","autonomía","patria","libertad","guerra"] } ]
+    };
+    const nivel1 = {
+        characters: [
+            ...nivel0.characters,
+            { name: "Antonio Maceo", desc: "Titán de Bronce, lugarteniente general.", postura: "Independencia con igualdad racial y sin claudicaciones." },
+            { name: "Máximo Gómez", desc: "Generalísimo del Ejército Libertador.", postura: "Guerra necesaria hasta lograr independencia absoluta." }
+        ],
+        topics: [
+            { name: "¿Debe Cuba aceptar un pacto con España o continuar la guerra?", expectedKeywords: ["pacto","guerra","independencia","rendición","Zanjón"] },
+            { name: "¿Qué papel debe tener la esclavitud en la Cuba independiente?", expectedKeywords: ["esclavitud","abolición","libertad","negros","derechos"] },
+            { name: "¿Cómo debe organizarse la futura república cubana?", expectedKeywords: ["república","constitución","democracia","representación","leyes"] }
+        ]
+    };
+    const nivel2 = {
+        characters: [
+            ...nivel1.characters,
+            { name: "Mariana Grajales", desc: "Madre de la Patria, formó a sus hijos en la lucha.", postura: "La educación en valores y el sacrificio son base de la independencia." },
+            { name: "José Martí", desc: "Apóstol, organizador de la Guerra Necesaria.", postura: "La independencia debe ir acompañada de justicia social y cultura." }
+        ],
+        topics: [
+            ...nivel1.topics,
+            { name: "¿Fue acertada la Protesta de Baraguá liderada por Maceo?", expectedKeywords: ["Baraguá","Maceo","protesta","Zanjón","honor"] },
+            { name: "¿Qué debe priorizar Cuba después de la independencia: desarrollo económico o igualdad social?", expectedKeywords: ["económico","igualdad","social","desarrollo","justicia"] }
+        ]
+    };
+
+    let currentLevel = 0;
+    let currentCharacters = [];
+    let currentTopics = [];
+    let selectedCharacterIndex = 0;
+    let selectedTopicIndex = 0;
+    let historyEntries = [];
+
+    const charactersListDiv = document.getElementById('charactersList');
+    const topicSelect = document.getElementById('topicSelect');
+    const argumentInput = document.getElementById('argumentInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const iaFeedbackDiv = document.getElementById('iaFeedback');
+    const historyLogDiv = document.getElementById('historyLog');
+
+    function loadLevel(level) {
+        if (level === 0) { currentCharacters = [...nivel0.characters]; currentTopics = [...nivel0.topics]; }
+        else if (level === 1) { currentCharacters = [...nivel1.characters]; currentTopics = [...nivel1.topics]; }
+        else { currentCharacters = [...nivel2.characters]; currentTopics = [...nivel2.topics]; }
+        selectedCharacterIndex = 0;
+        selectedTopicIndex = 0;
+        renderCharacters();
+        renderTopics();
+        updateUiFromSelection();
+        historyEntries = [];
+        renderHistory();
+        iaFeedbackDiv.innerHTML = "💡 Cabildo abierto. Selecciona personaje y tema, luego redacta tu discurso. La IA te dará consejos históricos.";
+    }
+
+    function renderCharacters() {
+        charactersListDiv.innerHTML = '';
+        currentCharacters.forEach((ch, idx) => {
+            const div = document.createElement('div');
+            div.className = `character-card ${idx === selectedCharacterIndex ? 'selected' : ''}`;
+            div.innerHTML = `<div class="character-name">${ch.name}</div><div class="character-desc">${ch.desc}</div>`;
+            div.addEventListener('click', () => {
+                selectedCharacterIndex = idx;
+                renderCharacters();
+                updateUiFromSelection();
+            });
+            charactersListDiv.appendChild(div);
+        });
+    }
+
+    function renderTopics() {
+        topicSelect.innerHTML = '';
+        currentTopics.forEach((topic, idx) => {
+            const option = document.createElement('option');
+            option.value = idx;
+            option.textContent = topic.name;
+            if (idx === selectedTopicIndex) option.selected = true;
+            topicSelect.appendChild(option);
+        });
+        topicSelect.addEventListener('change', (e) => {
+            selectedTopicIndex = parseInt(e.target.value);
+            updateUiFromSelection();
+        });
+    }
+
+    function updateUiFromSelection() {
+        const character = currentCharacters[selectedCharacterIndex];
+        const topic = currentTopics[selectedTopicIndex];
+        iaFeedbackDiv.innerHTML = `🗣️ Tema: "${topic.name}". Defiende la postura de ${character.name}: "${character.postura}"`;
+    }
+
+    function addHistory(speaker, message) {
+        historyEntries.unshift(`📌 ${speaker}: ${message.substring(0, 280)}`);
+        if (historyEntries.length > 12) historyEntries.pop();
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (historyEntries.length === 0) { historyLogDiv.innerHTML = '<p><em>Registro del cabildo</em></p>'; return; }
+        historyLogDiv.innerHTML = historyEntries.map(entry => `<p>${entry}</p>`).join('');
+    }
+
+    function analyzeArgument() {
+        const argumento = argumentInput.value.trim();
+        if (argumento === "") { iaFeedbackDiv.innerHTML = "❌ Escribe tu argumento antes de enviarlo."; return; }
+        const character = currentCharacters[selectedCharacterIndex];
+        const topic = currentTopics[selectedTopicIndex];
+        const lowerArg = argumento.toLowerCase();
+        const keywords = topic.expectedKeywords || [];
+        let matched = keywords.filter(kw => lowerArg.includes(kw)).length;
+        let analysis = "";
+
+        if (matched >= keywords.length * 0.6) {
+            analysis = `✅ Excelente discurso. Has usado conceptos clave como ${keywords.slice(0,3).join(', ')} y defiende bien la postura de ${character.name}: "${character.postura}". La IA considera que tu argumento tiene coherencia histórica.`;
+        } else if (matched > 0) {
+            analysis = `⚠️ Buen intento. Mencionaste ${matched} de ${keywords.length} conceptos relevantes. Para fortalecer tu postura, profundiza en: ${keywords.join(', ')}. ${character.name} sostenía: "${character.postura}".`;
+        } else {
+            analysis = `🔄 Tu argumento no refleja claramente la postura de ${character.name}. Te sugerimos incorporar términos como ${keywords.join(', ')} y contrastar la posición de los independentistas y autonomistas. Recuerda que ${character.name} defendía: "${character.postura}".`;
+        }
+        analysis += `<br><br>🎯 Recuerda: en un cabildo abierto se usan recursos retóricos y datos históricos (fechas, documentos, personajes). ¡Sigue así!`;
+        iaFeedbackDiv.innerHTML = analysis;
+        addHistory(`🧑‍🎓 Vocal (como ${character.name})`, argumento);
+        addHistory(`🤖 IA (asesoría histórica)`, analysis.replace(/<br>/g, ' '));
+        argumentInput.value = "";
+    }
+
+    function setLevel(level) {
+        currentLevel = level;
+        loadLevel(level);
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            if (parseInt(btn.getAttribute('data-level')) === level) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        adaptativeScreen();
+    }
+
+    submitBtn.addEventListener('click', analyzeArgument);
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLevel(parseInt(btn.getAttribute('data-level'))));
+    });
+
+    function adaptativeScreen() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        if (width < 480) document.body.style.padding = '0.6rem';
+        else if (width < 768) document.body.style.padding = '1rem';
+        else document.body.style.padding = '1.5rem';
+        const history = document.querySelector('.history');
+        if (history && height < 550 && width > height) history.style.maxHeight = '140px';
+        else if (history) history.style.maxHeight = '220px';
+    }
+    window.addEventListener('resize', adaptativeScreen);
+    window.addEventListener('orientationchange', () => setTimeout(adaptativeScreen, 30));
+
+    setLevel(0);
+    adaptativeScreen();
+</script>
+</body>
+</html>

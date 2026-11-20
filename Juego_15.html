@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 15 · Sopa de letras · Conceptos clave de Cuba</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { background:#eef2f7; font-family:'Segoe UI',Roboto,system-ui,'Noto Sans',sans-serif; padding:clamp(0.75rem,3vw,1.5rem); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+        .container { max-width:1200px; width:100%; background:white; border-radius:2rem; box-shadow:0 25px 45px -12px rgba(0,0,0,0.3); overflow:hidden; border-top:6px solid #ce1126; border-bottom:6px solid #002a8f; }
+        .header { background:linear-gradient(135deg,#1e3a5f,#0f2c44); color:white; padding:1.2rem clamp(1rem,4vw,2rem); text-align:center; }
+        .header h1 { font-size:clamp(1.3rem,6vw,1.9rem); }
+        .level-bar { padding:0.8rem clamp(1rem,3vw,2rem); display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; background:#f4f7fc; }
+        .level-btn { padding:0.4rem 1rem; font-size:clamp(0.7rem,3.5vw,0.9rem); border:none; border-radius:2rem; cursor:pointer; font-weight:bold; background:#1e40af; color:white; transition:0.2s; }
+        .level-btn.active { background:#ce1126; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+        .game-area { display:flex; flex-wrap:wrap; gap:1.5rem; padding:1.5rem clamp(1rem,3vw,2rem); }
+        .sopa-container { flex:2; min-width:280px; background:#fffcf5; border-radius:1.8rem; padding:1rem; display:flex; justify-content:center; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        .sopa-grid { display:inline-grid; gap:3px; background:#ddd2bf; padding:6px; border-radius:1rem; margin:0 auto; }
+        .sopa-cell { width:clamp(32px,8vw,52px); height:clamp(32px,8vw,52px); background:#fffaf2; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:clamp(0.8rem,4vw,1.1rem); text-transform:uppercase; font-family:'Courier New',monospace; border-radius:10px; cursor:pointer; transition:0.1s; box-shadow:inset 0 0 0 1px #e0cfb8; touch-action:manipulation; }
+        .sopa-cell.selected { background:#fbd38d; transform:scale(0.96); }
+        .sopa-cell.found { background:#9ae6b4; color:#22543d; text-decoration:line-through; opacity:0.85; cursor:default; }
+        .sopa-cell.hint-highlight { background:#ffd966 !important; box-shadow:0 0 0 3px #ce1126 !important; transform:scale(1.02); z-index:2; }
+        .word-panel { flex:1; min-width:260px; background:#fef9ef; border-radius:1.5rem; padding:1.2rem; border:1px solid #ede3cf; }
+        .word-list { list-style:none; margin:1rem 0; max-height:340px; overflow-y:auto; }
+        .word-list li { background:white; margin:0.5rem 0; padding:0.5rem 0.8rem; border-radius:2rem; display:flex; justify-content:space-between; align-items:center; border-left:5px solid #ce1126; font-weight:600; font-size:clamp(0.75rem,3.5vw,0.9rem); cursor:pointer; transition:0.1s; word-break:break-word; }
+        .word-list li.found-word { background:#c6f7d0; text-decoration:line-through; opacity:0.8; border-left-color:#2f855a; }
+        .badge { background:#2c5282; color:white; border-radius:30px; padding:0.2rem 0.6rem; font-size:0.65rem; }
+        .ai-help { background:#f0f4fa; border-radius:1rem; padding:0.8rem; margin:1rem 0; font-size:0.85rem; }
+        button { background:#1e40af; color:white; border:none; padding:0.5rem 1rem; border-radius:2rem; font-weight:bold; cursor:pointer; margin-top:0.5rem; width:100%; font-size:clamp(0.75rem,3.5vw,0.9rem); }
+        button.reset { background:#9b2c1d; }
+        .status { display:flex; justify-content:space-between; align-items:center; margin-top:1rem; flex-wrap:wrap; gap:0.5rem; }
+        footer { background:#1e2f3c; color:#cddce9; text-align:center; padding:0.9rem; font-size:0.75rem; }
+        .game-nav { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin:1rem; padding-top:0.5rem; border-top:1px solid #ccc; }
+        .game-nav button { background:#1e40af; width:auto; margin:0; padding:0.4rem 1rem; font-size:0.8rem; }
+        @media (max-width:700px){ .sopa-cell { width:clamp(28px,7vw,45px); height:clamp(28px,7vw,45px); font-size:0.9rem; } }
+        @media (orientation:landscape) and (max-height:550px){ .word-list { max-height:180px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🇨🇺 Sopa de letras · Conceptos clave de Cuba</h1>
+        <p>Encuentra términos fundamentales de la historia y la identidad cubana. ¡Pide pistas visuales (máx 2 por nivel)!</p>
+    </div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (5 conceptos)</button>
+        <button class="level-btn" data-level="1">📘 Normal (8 conceptos)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (12 conceptos)</button>
+    </div>
+    <div class="game-area">
+        <div class="sopa-container">
+            <div class="sopa-grid" id="sopaGrid"></div>
+        </div>
+        <div class="word-panel">
+            <h3>📜 Conceptos a encontrar</h3>
+            <ul class="word-list" id="wordList"></ul>
+            <div class="ai-help">
+                <strong>🤖 Ayuda IA (historia de Cuba):</strong><br>
+                <span id="aiMessage">Haz clic en cualquier palabra de la lista para conocer su significado. Arrastra o desliza sobre las letras para seleccionar una palabra.</span>
+                <button id="hintBtn">✨ Pedir pista visual</button>
+                <button id="resetGameBtn" class="reset">🔄 Reiniciar nivel</button>
+                <div style="margin-top:8px; font-size:0.75rem;" id="hintsRemainingDisplay">🎯 Ayudas restantes: 2</div>
+            </div>
+            <div class="status">
+                <span>🏆 Encontrados: <strong id="foundCount">0</strong> / <span id="totalCount">0</span></span>
+                <span id="levelName" class="badge">Fácil</span>
+            </div>
+        </div>
+    </div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_14.html'">◀ Anterior</button>
+        <button onclick="location.href='Juego_16.html'">Siguiente ▶</button>
+    </div>
+    <footer>📖 Homenaje a la historia patria · IA didáctica · Independencia, soberanía, abolición, república...</footer>
+</div>
+
+<script>
+    const nivelesData = [
+        { name:"Fácil", words:["INDEPENDENCIA","REPUBLICA","SOBERANIA","ABOLICION","COLONIA"], defs:{"INDEPENDENCIA":"Separación del dominio español (lograda en 1898 pero con intervención estadounidense).","REPUBLICA":"Forma de gobierno sin monarquía, proclamada el 20 de mayo de 1902.","SOBERANIA":"Poder supremo de la nación, conquistado con las guerras de independencia.","ABOLICION":"Fin de la esclavitud en Cuba (1886).","COLONIA":"Período bajo dominio español (1492-1898)."}, gridSize:10 },
+        { name:"Normal", words:["INDEPENDENCIA","REPUBLICA","SOBERANIA","ABOLICION","COLONIA","MANIFIESTO","GUERRA","MAMBIS"], defs:{"INDEPENDENCIA":"Separación del dominio español.","REPUBLICA":"Forma de gobierno republicana.","SOBERANIA":"Poder supremo de la nación.","ABOLICION":"Fin de la esclavitud en 1886.","COLONIA":"Período bajo dominio español.","MANIFIESTO":"Documento político independentista (Manifiesto de Montecristi).","GUERRA":"Conflicto armado por la independencia.","MAMBIS":"Soldados cubanos que lucharon por la independencia."}, gridSize:12 },
+        { name:"Difícil", words:["INDEPENDENCIA","REPUBLICA","SOBERANIA","ABOLICION","COLONIA","MANIFIESTO","GUERRA","MAMBIS","INTERVENCION","BLOQUEO","ALFABETIZACION","SIERRAMAESTRA"], defs:{"INDEPENDENCIA":"Separación del dominio español.","REPUBLICA":"Forma de gobierno republicana.","SOBERANIA":"Poder supremo de la nación.","ABOLICION":"Fin de la esclavitud en 1886.","COLONIA":"Período bajo dominio español.","MANIFIESTO":"Documento político independentista.","GUERRA":"Conflicto armado por la independencia.","MAMBIS":"Soldados cubanos independentistas.","INTERVENCION":"Intervención norteamericana de 1898.","BLOQUEO":"Embargo económico de Estados Unidos contra Cuba (1960-actualidad).","ALFABETIZACION":"Campaña Nacional de Alfabetización (1961).","SIERRAMAESTRA":"Sierra Maestra, montaña donde se refugió el Ejército Rebelde."}, gridSize:16 }
+    ];
+
+    let currentLevel = 0;
+    let grid = [];
+    let wordPositions = [];
+    let foundWords = new Set();
+    let selectedCells = [];
+    let mouseDown = false;
+    let hintsUsed = 0;
+    let activeHintTimeout = null;
+
+    const sopaGrid = document.getElementById('sopaGrid');
+    const wordListEl = document.getElementById('wordList');
+    const foundCountSpan = document.getElementById('foundCount');
+    const totalCountSpan = document.getElementById('totalCount');
+    const aiMessageSpan = document.getElementById('aiMessage');
+    const levelNameSpan = document.getElementById('levelName');
+    const hintBtn = document.getElementById('hintBtn');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const hintsRemainingSpan = document.getElementById('hintsRemainingDisplay');
+
+    function updateHintsUI() { const r=Math.max(0,2-hintsUsed); hintsRemainingSpan.innerHTML=`🎯 Ayudas restantes: ${r} / 2`; }
+    function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+    function canPlace(word,r,c,dr,dc,gridMat,size){ for(let i=0;i<word.length;i++){ const nr=r+i*dr, nc=c+i*dc; if(nr<0||nr>=size||nc<0||nc>=size) return false; if(gridMat[nr][nc]!=='' && gridMat[nr][nc]!==word[i]) return false; } return true; }
+    function placeWord(word,r,c,dr,dc,gridMat){ for(let i=0;i<word.length;i++){ const nr=r+i*dr, nc=c+i*dc; gridMat[nr][nc]=word[i]; } }
+    function generateSopa(level){ const data=nivelesData[level], size=data.gridSize; let newGrid=Array(size).fill().map(()=>Array(size).fill('')); let wordsToPlace=[...data.words]; const dirs=[[0,1],[1,0],[1,1],[1,-1],[-1,1],[-1,0],[0,-1],[-1,-1]]; let placed=[]; const shuffledWords=shuffleArray(wordsToPlace); for(let w of shuffledWords){ let placedFlag=false, attempts=0; while(!placedFlag && attempts<600){ const dir=dirs[Math.floor(Math.random()*dirs.length)], row=Math.floor(Math.random()*size), col=Math.floor(Math.random()*size); if(canPlace(w,row,col,dir[0],dir[1],newGrid,size)){ const cells=[]; for(let i=0;i<w.length;i++) cells.push([row+i*dir[0],col+i*dir[1]]); placeWord(w,row,col,dir[0],dir[1],newGrid); placed.push({word:w,cells}); placedFlag=true; } attempts++; } if(!placedFlag){ for(let r=0;r<size&&!placedFlag;r++) for(let c=0;c<size&&!placedFlag;c++) for(let d of dirs) if(canPlace(w,r,c,d[0],d[1],newGrid,size)){ const cells=[]; for(let i=0;i<w.length;i++) cells.push([r+i*d[0],c+i*d[1]]); placeWord(w,r,c,d[0],d[1],newGrid); placed.push({word:w,cells}); placedFlag=true; break; } } } const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; for(let i=0;i<size;i++) for(let j=0;j<size;j++) if(newGrid[i][j]==='') newGrid[i][j]=letters[Math.floor(Math.random()*letters.length)]; return {grid:newGrid, positions:placed}; }
+    function isCellPartOfFoundWord(r,c){ for(let pos of wordPositions) if(foundWords.has(pos.word)) for(let [rr,cc] of pos.cells) if(rr===r&&cc===c) return true; return false; }
+    function showHintHighlightForWord(word){ document.querySelectorAll('.sopa-cell.hint-highlight').forEach(c=>c.classList.remove('hint-highlight')); if(activeHintTimeout) clearTimeout(activeHintTimeout); const posEntry=wordPositions.find(p=>p.word===word); if(!posEntry) return false; for(let [r,c] of posEntry.cells){ const cellDiv=document.querySelector(`.sopa-cell[data-row='${r}'][data-col='${c}']`); if(cellDiv) cellDiv.classList.add('hint-highlight'); } activeHintTimeout=setTimeout(()=>{ document.querySelectorAll('.sopa-cell.hint-highlight').forEach(c=>c.classList.remove('hint-highlight')); activeHintTimeout=null; },4000); return true; }
+    function giveHint(){ if(hintsUsed>=2){ aiMessageSpan.innerHTML="⚠️ Ya no te quedan ayudas para este nivel. Reinicia el nivel para reponerlas."; return; } const allWords=nivelesData[currentLevel].words, notFound=allWords.filter(w=>!foundWords.has(w)); if(notFound.length===0){ aiMessageSpan.innerHTML="🎉 ¡Ya encontraste todas las palabras! Cambia de nivel para más retos."; return; } const randomWord=notFound[Math.floor(Math.random()*notFound.length)], definition=nivelesData[currentLevel].defs[randomWord]||"Concepto histórico cubano."; const success=showHintHighlightForWord(randomWord); if(success){ hintsUsed++; updateHintsUI(); aiMessageSpan.innerHTML=`🔍 Pista visual (${hintsUsed}/2): "${randomWord}" resaltada por 4 segundos. ${definition}`; } else aiMessageSpan.innerHTML=`⚠️ No se pudo resaltar la palabra, intenta de nuevo.`; }
+    function highlightSelected(){ document.querySelectorAll('.sopa-cell').forEach(c=>c.classList.remove('selected')); for(let [r,c] of selectedCells){ const sel=document.querySelector(`.sopa-cell[data-row='${r}'][data-col='${c}']`); if(sel) sel.classList.add('selected'); } }
+    function startSelection(r,c){ mouseDown=true; selectedCells=[[r,c]]; highlightSelected(); }
+    function addToSelection(r,c){ if(!mouseDown) return; const last=selectedCells[selectedCells.length-1]; const dr=Math.abs(r-last[0]), dc=Math.abs(c-last[1]); if((dr===1&&dc===0)||(dr===0&&dc===1)||(dr===1&&dc===1)){ if(!selectedCells.some(cell=>cell[0]===r&&cell[1]===c)){ selectedCells.push([r,c]); highlightSelected(); } } }
+    function endSelection(){ if(!mouseDown) return; mouseDown=false; if(selectedCells.length<2){ selectedCells=[]; highlightSelected(); return; } const selectedWord=selectedCells.map(cell=>grid[cell[0]][cell[1]]).join(''); const reversed=selectedWord.split('').reverse().join(''); let matched=null; for(let pos of wordPositions){ if(foundWords.has(pos.word)) continue; const posWord=pos.cells.map(cell=>grid[cell[0]][cell[1]]).join(''); if(selectedWord===posWord||reversed===posWord){ let matchOrder=true; for(let i=0;i<pos.cells.length;i++) if(selectedCells[i][0]!==pos.cells[i][0]||selectedCells[i][1]!==pos.cells[i][1]){ matchOrder=false; break; } if(matchOrder) matched=pos.word; if(!matched&&reversed===posWord){ const revCells=[...pos.cells].reverse(); let matchRev=true; for(let i=0;i<revCells.length;i++) if(selectedCells[i][0]!==revCells[i][0]||selectedCells[i][1]!==revCells[i][1]){ matchRev=false; break; } if(matchRev) matched=pos.word; } if(matched) break; } } if(matched&&!foundWords.has(matched)){ foundWords.add(matched); const def=nivelesData[currentLevel].defs[matched]||'Concepto histórico cubano.'; aiMessageSpan.innerHTML=`✅ ¡Correcto! ${matched}: ${def}`; renderSopa(); updateWordListUI(); updateStats(); if(foundWords.size===nivelesData[currentLevel].words.length) aiMessageSpan.innerHTML="🏆 ¡Completaste el nivel! Cambia de dificultad o reinicia para más práctica."; } else if(selectedCells.length>1) aiMessageSpan.innerHTML=`🔍 No es una palabra válida. Sigue buscando.`; selectedCells=[]; highlightSelected(); }
+    function updateWordListUI(){ const words=nivelesData[currentLevel].words; wordListEl.innerHTML=''; for(let w of words){ const li=document.createElement('li'); li.innerHTML=`<span>${w}</span> <span class="badge">📖</span>`; if(foundWords.has(w)) li.classList.add('found-word'); li.onclick=()=>{ const def=nivelesData[currentLevel].defs[w]||'Concepto histórico cubano.'; aiMessageSpan.innerHTML=`📖 ${w}: ${def}`; }; wordListEl.appendChild(li); } }
+    function updateStats(){ const total=nivelesData[currentLevel].words.length; foundCountSpan.innerText=foundWords.size; totalCountSpan.innerText=total; levelNameSpan.innerText=`${nivelesData[currentLevel].name} (${nivelesData[currentLevel].gridSize}x${nivelesData[currentLevel].gridSize})`; }
+    function renderSopa(){ const size=nivelesData[currentLevel].gridSize; sopaGrid.style.gridTemplateColumns=`repeat(${size}, minmax(clamp(32px,8vw,52px), auto))`; sopaGrid.innerHTML=''; for(let i=0;i<size;i++) for(let j=0;j<size;j++){ const cell=document.createElement('div'); cell.className='sopa-cell'; if(isCellPartOfFoundWord(i,j)) cell.classList.add('found'); cell.textContent=grid[i][j]; cell.setAttribute('data-row',i); cell.setAttribute('data-col',j); cell.addEventListener('mousedown',(e)=>{ e.preventDefault(); startSelection(i,j); }); cell.addEventListener('mouseenter',()=>{ if(mouseDown) addToSelection(i,j); }); cell.addEventListener('mouseup',()=>endSelection()); cell.addEventListener('touchstart',(e)=>{ e.preventDefault(); startSelection(i,j); },{passive:false}); cell.addEventListener('touchmove',(e)=>{ e.preventDefault(); const touch=e.touches[0]; const elem=document.elementFromPoint(touch.clientX,touch.clientY); if(elem&&elem.classList&&elem.classList.contains('sopa-cell')){ const r=parseInt(elem.dataset.row), c=parseInt(elem.dataset.col); addToSelection(r,c); } },{passive:false}); cell.addEventListener('touchend',()=>endSelection()); sopaGrid.appendChild(cell); } updateWordListUI(); updateStats(); }
+    function resetLevel(){ if(activeHintTimeout) clearTimeout(activeHintTimeout); document.querySelectorAll('.sopa-cell.hint-highlight').forEach(c=>c.classList.remove('hint-highlight')); const {grid:newGrid,positions}=generateSopa(currentLevel); grid=newGrid; wordPositions=positions; foundWords.clear(); selectedCells=[]; mouseDown=false; hintsUsed=0; updateHintsUI(); renderSopa(); aiMessageSpan.innerHTML=`🎯 Nivel: ${nivelesData[currentLevel].name} (${nivelesData[currentLevel].gridSize}x${nivelesData[currentLevel].gridSize}). Tienes 2 ayudas visuales por nivel.`; }
+    function setLevel(level){ currentLevel=level; resetLevel(); document.querySelectorAll('.level-btn').forEach(btn=>{ if(parseInt(btn.dataset.level)===level) btn.classList.add('active'); else btn.classList.remove('active'); }); adaptativeScreen(); }
+    document.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>setLevel(parseInt(btn.dataset.level)))); hintBtn.onclick=giveHint; resetBtn.onclick=resetLevel;
+    function adaptativeScreen(){ const w=window.innerWidth, h=window.innerHeight; document.body.style.padding = w<480?'0.6rem':(w<768?'1rem':'1.5rem'); const size=nivelesData[currentLevel]?.gridSize||10; if(sopaGrid) sopaGrid.style.gridTemplateColumns=`repeat(${size}, minmax(clamp(28px,7vw,52px), auto))`; const wl=document.querySelector('.word-list'); if(wl) wl.style.maxHeight = (h<550 && w>h)?'180px':'340px'; }
+    window.addEventListener('resize',adaptativeScreen); window.addEventListener('orientationchange',()=>setTimeout(adaptativeScreen,30));
+    setLevel(0); adaptativeScreen();
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 4 · Juego de roles literarios · Cuba</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { background:#eef2f7; font-family:'Segoe UI',Roboto,system-ui,sans-serif; padding:clamp(0.75rem,3vw,1.5rem); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+        .container { max-width:1200px; width:100%; background:white; border-radius:2rem; box-shadow:0 25px 45px -12px rgba(0,0,0,0.3); overflow:hidden; border-top:6px solid #ce1126; border-bottom:6px solid #002a8f; }
+        .header { background:linear-gradient(135deg,#1e3a5f,#0f2c44); color:white; padding:1.2rem clamp(1rem,4vw,2rem); text-align:center; }
+        .header h1 { font-size:clamp(1.3rem,6vw,1.9rem); }
+        .level-bar { padding:0.8rem clamp(1rem,3vw,2rem); display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; background:#f4f7fc; }
+        .level-btn { padding:0.4rem 1rem; font-size:clamp(0.7rem,3.5vw,0.9rem); border:none; border-radius:2rem; cursor:pointer; font-weight:bold; background:#1e40af; color:white; transition:0.2s; }
+        .level-btn.active { background:#ce1126; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+        .game-area { padding:1.5rem clamp(1rem,3vw,2rem); }
+        .role-play { display:flex; flex-wrap:wrap; gap:1.5rem; }
+        .characters-panel { flex:1.2; min-width:240px; background:#fef9ef; border-radius:1.5rem; padding:1rem; border:1px solid #ede3cf; }
+        .debate-panel { flex:2; min-width:280px; background:#fffcf5; border-radius:1.5rem; padding:1rem; border:1px solid #ede3cf; }
+        .character-card { background:white; margin:0.8rem 0; padding:0.8rem; border-radius:1rem; cursor:pointer; border-left:5px solid #ce1126; transition:0.1s; }
+        .character-card.selected { background:#ffecb3; border-left-color:#002a8f; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+        .character-name { font-weight:bold; font-size:1.1rem; }
+        .character-desc { font-size:0.8rem; color:#4a5568; }
+        .topic-selector { margin:1rem 0; }
+        select, textarea { width:100%; padding:0.6rem; border-radius:2rem; border:1px solid #dbc6a0; font-family:inherit; font-size:0.9rem; background:white; }
+        textarea { border-radius:1rem; resize:vertical; }
+        button { background:#1e40af; color:white; border:none; padding:0.6rem 1rem; border-radius:2rem; font-weight:bold; cursor:pointer; margin:0.5rem 0; width:100%; font-size:clamp(0.8rem,3.5vw,0.9rem); transition:0.2s; }
+        button:active { transform:scale(0.96); }
+        .ia-feedback { background:#e9f0fa; border-radius:1rem; padding:0.8rem; margin-top:1rem; font-size:0.9rem; border-left:4px solid #ce1126; }
+        .history { background:#fef7e8; border-radius:1rem; padding:0.8rem; margin-top:1rem; max-height:200px; overflow-y:auto; font-size:0.85rem; }
+        footer { background:#1e2f3c; color:#cddce9; text-align:center; padding:0.9rem; font-size:0.75rem; }
+        .game-nav { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin:1rem; padding-top:0.5rem; border-top:1px solid #ccc; }
+        .game-nav button { background:#1e40af; width:auto; margin:0; padding:0.4rem 1rem; font-size:0.8rem; }
+        @media (max-width:750px){ .role-play { flex-direction:column; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎭 Juego de roles literarios · Debate entre autores cubanos</h1>
+        <p>Asume el papel de Martí, Guillén o Carpentier, defiende su postura y recibe retroalimentación de IA.</p>
+    </div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (3 personajes · 1 tema)</button>
+        <button class="level-btn" data-level="1">📘 Normal (3 personajes · 3 temas)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (5 personajes · 5 temas)</button>
+    </div>
+    <div class="game-area">
+        <div class="role-play">
+            <div class="characters-panel">
+                <h3>📌 Personajes</h3>
+                <div id="charactersList"></div>
+                <div class="topic-selector">
+                    <label>🗣️ Tema de debate:</label>
+                    <select id="topicSelect"></select>
+                </div>
+            </div>
+            <div class="debate-panel">
+                <h3>✍️ Tu argumento (como el personaje seleccionado)</h3>
+                <textarea id="argumentInput" rows="4" placeholder="Escribe aquí tu defensa literaria o ideológica..."></textarea>
+                <button id="submitBtn">🤖 Enviar y recibir análisis IA</button>
+                <div id="iaFeedback" class="ia-feedback">💡 La IA evaluará tu argumento y te dará consejos.</div>
+                <div class="history" id="historyLog"><p><em>Historial del debate</em></p></div>
+            </div>
+        </div>
+    </div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_03.html'">◀ Anterior</button>
+        <button onclick="location.href='Juego_05.html'">Siguiente ▶</button>
+    </div>
+    <footer>📖 Basado en las obras de José Martí, Nicolás Guillén y Alejo Carpentier · IA educativa</footer>
+</div>
+
+<script>
+    // ==================== DATOS DE PERSONAJES Y TEMAS POR NIVEL ====================
+    const level0 = {
+        characters: [
+            { name: "José Martí", desc: "Poeta, ensayista, héroe nacional. Defensor de la independencia y la educación popular.", idea: "La literatura debe servir a la libertad y la justicia." },
+            { name: "Nicolás Guillén", desc: "Poeta de la negritud. Su obra reivindica la cultura afrocubana y la igualdad racial.", idea: "El verso debe ser ritmo, mestizaje y denuncia social." },
+            { name: "Alejo Carpentier", desc: "Novelista, musicólogo. Creador de lo real maravilloso.", idea: "La identidad cubana es barroca y mágica, hay que explorar su asombro." }
+        ],
+        topics: [ { name: "¿Cuál es el papel del escritor en la construcción de la identidad nacional?", expectedKeywords: ["identidad","nación","cultura","patria","cubano"] } ]
+    };
+    const level1 = {
+        characters: level0.characters.slice(),
+        topics: [
+            { name: "¿Cómo debe ser la relación entre literatura y compromiso político?", expectedKeywords: ["compromiso","política","revolución","libertad","justicia"] },
+            { name: "¿Qué elementos de la cultura afrocubana deben estar presentes en la literatura?", expectedKeywords: ["afrocubana","ritmo","negritud","tambor","son"] },
+            { name: "¿Qué importancia tiene la memoria histórica en la narrativa cubana?", expectedKeywords: ["memoria","historia","colonial","independencia","pasado"] }
+        ]
+    };
+    const level2 = {
+        characters: [
+            ...level0.characters,
+            { name: "Dulce María Loynaz", desc: "Poeta intimista, Premio Cervantes. Su obra explora el silencio y el amor.", idea: "La poesía es un jardín secreto, un refugio de la belleza." },
+            { name: "José Lezama Lima", desc: "Poeta barroco, fundador del grupo Orígenes. Autor de 'Paradiso'.", idea: "La literatura es un sistema poético del mundo, una respiración." }
+        ],
+        topics: [
+            ...level1.topics,
+            { name: "¿Qué lugar ocupa la mujer en la literatura cubana actual?", expectedKeywords: ["mujer","femenina","género","poetisa","voz"] },
+            { name: "¿Cómo se manifiesta el neobarroco en la literatura cubana?", expectedKeywords: ["neobarroco","barroco","Lezama","metáfora","complejidad"] }
+        ]
+    };
+
+    let currentLevel = 0;
+    let currentCharacters = [];
+    let currentTopics = [];
+    let selectedCharacterIndex = 0;
+    let selectedTopicIndex = 0;
+    let historyEntries = [];
+
+    const charactersListDiv = document.getElementById('charactersList');
+    const topicSelect = document.getElementById('topicSelect');
+    const argumentInput = document.getElementById('argumentInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const iaFeedbackDiv = document.getElementById('iaFeedback');
+    const historyLogDiv = document.getElementById('historyLog');
+
+    function loadLevel(level) {
+        if (level === 0) { currentCharacters = [...level0.characters]; currentTopics = [...level0.topics]; }
+        else if (level === 1) { currentCharacters = [...level1.characters]; currentTopics = [...level1.topics]; }
+        else { currentCharacters = [...level2.characters]; currentTopics = [...level2.topics]; }
+        selectedCharacterIndex = 0;
+        selectedTopicIndex = 0;
+        renderCharacters();
+        renderTopics();
+        updateUiFromSelection();
+        historyEntries = [];
+        renderHistory();
+        iaFeedbackDiv.innerHTML = "💡 Nivel cargado. Selecciona un personaje y un tema, luego escribe tu argumento.";
+    }
+
+    function renderCharacters() {
+        charactersListDiv.innerHTML = '';
+        currentCharacters.forEach((ch, idx) => {
+            const div = document.createElement('div');
+            div.className = `character-card ${idx === selectedCharacterIndex ? 'selected' : ''}`;
+            div.innerHTML = `<div class="character-name">${ch.name}</div><div class="character-desc">${ch.desc}</div>`;
+            div.addEventListener('click', () => {
+                selectedCharacterIndex = idx;
+                renderCharacters();
+                updateUiFromSelection();
+            });
+            charactersListDiv.appendChild(div);
+        });
+    }
+
+    function renderTopics() {
+        topicSelect.innerHTML = '';
+        currentTopics.forEach((topic, idx) => {
+            const option = document.createElement('option');
+            option.value = idx;
+            option.textContent = topic.name;
+            if (idx === selectedTopicIndex) option.selected = true;
+            topicSelect.appendChild(option);
+        });
+        topicSelect.addEventListener('change', (e) => {
+            selectedTopicIndex = parseInt(e.target.value);
+            updateUiFromSelection();
+        });
+    }
+
+    function updateUiFromSelection() {
+        const topicName = currentTopics[selectedTopicIndex]?.name || '';
+        iaFeedbackDiv.innerHTML = `🗣️ Tema actual: "${topicName}". Escribe tu argumento desde la perspectiva de ${currentCharacters[selectedCharacterIndex]?.name}.`;
+    }
+
+    function addHistory(speaker, message) {
+        historyEntries.unshift(`📌 ${speaker}: ${message.substring(0, 280)}`);
+        if (historyEntries.length > 15) historyEntries.pop();
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (historyEntries.length === 0) { historyLogDiv.innerHTML = '<p><em>Historial del debate</em></p>'; return; }
+        historyLogDiv.innerHTML = historyEntries.map(entry => `<p>${entry}</p>`).join('');
+    }
+
+    function analyzeArgument() {
+        const argument = argumentInput.value.trim();
+        if (argument === "") { iaFeedbackDiv.innerHTML = "❌ Escribe tu argumento antes de enviarlo."; return; }
+        const character = currentCharacters[selectedCharacterIndex];
+        const topic = currentTopics[selectedTopicIndex];
+        const lowerArg = argument.toLowerCase();
+        const keywords = topic.expectedKeywords || [];
+        let matched = keywords.filter(kw => lowerArg.includes(kw)).length;
+        let analysis = "";
+        if (matched >= keywords.length * 0.6) {
+            analysis = `✅ Excelente argumento. Tu postura está alineada con la visión de ${character.name}. Usaste términos clave como ${keywords.slice(0,3).join(', ')}. Muestra comprensión de la identidad literaria cubana.`;
+        } else if (matched > 0) {
+            analysis = `⚠️ Buen intento. Mencionaste ${matched} de ${keywords.length} conceptos relevantes. Te sugerimos profundizar en: ${keywords.join(', ')}. Lee más sobre ${character.name} para fortalecer tu perspectiva.`;
+        } else {
+            analysis = `🔄 Tu argumento no refleja claramente la postura de ${character.name}. Recuerda que él/ella defendía: "${character.idea}". Intenta incorporar términos como ${keywords.join(', ')} y contextualizarlo en la literatura cubana.`;
+        }
+        analysis += `<br><br>🎭 Consejo de ${character.name}: "${character.idea}"`;
+        iaFeedbackDiv.innerHTML = analysis;
+        addHistory(`🧑‍🎓 Estudiante (como ${character.name})`, argument);
+        addHistory(`🤖 IA (retroalimentación)`, analysis.replace(/<br>/g, ' '));
+        argumentInput.value = "";
+    }
+
+    function setLevel(level) {
+        currentLevel = level;
+        loadLevel(level);
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            if (parseInt(btn.getAttribute('data-level')) === level) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        adaptativeScreen();
+    }
+
+    submitBtn.addEventListener('click', analyzeArgument);
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLevel(parseInt(btn.getAttribute('data-level'))));
+    });
+
+    function adaptativeScreen() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        if (width < 480) document.body.style.padding = '0.6rem';
+        else if (width < 768) document.body.style.padding = '1rem';
+        else document.body.style.padding = '1.5rem';
+        const history = document.querySelector('.history');
+        if (history && height < 550 && width > height) history.style.maxHeight = '140px';
+        else if (history) history.style.maxHeight = '200px';
+    }
+    window.addEventListener('resize', adaptativeScreen);
+    window.addEventListener('orientationchange', () => setTimeout(adaptativeScreen, 30));
+
+    setLevel(0);
+    adaptativeScreen();
+</script>
+</body>
+</html>

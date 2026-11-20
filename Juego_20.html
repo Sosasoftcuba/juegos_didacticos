@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 20 · Debate: Educación en la independencia · Cuba</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { background:#eef2f7; font-family:'Segoe UI',Roboto,system-ui,-apple-system,sans-serif; padding:clamp(0.75rem,3vw,1.5rem); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+        .container { max-width:1200px; width:100%; background:white; border-radius:2rem; box-shadow:0 25px 45px -12px rgba(0,0,0,0.3); overflow:hidden; border-top:6px solid #ce1126; border-bottom:6px solid #002a8f; }
+        .header { background:linear-gradient(135deg,#1e3a5f,#0f2c44); color:white; padding:1.2rem clamp(1rem,4vw,2rem); text-align:center; }
+        .header h1 { font-size:clamp(1.3rem,6vw,1.9rem); }
+        .level-bar { padding:0.8rem clamp(1rem,3vw,2rem); display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; background:#f4f7fc; }
+        .level-btn { padding:0.4rem 1rem; font-size:clamp(0.7rem,3.5vw,0.9rem); border:none; border-radius:2rem; cursor:pointer; font-weight:bold; background:#1e40af; color:white; transition:0.2s; }
+        .level-btn.active { background:#ce1126; color:white; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+        .game-area { display:flex; flex-wrap:wrap; gap:1.5rem; padding:1.5rem clamp(1rem,3vw,2rem); }
+        .characters-panel { flex:1.2; min-width:240px; background:#fef9ef; border-radius:1.5rem; padding:1rem; border:1px solid #ede3cf; }
+        .debate-panel { flex:2; min-width:280px; background:#fffcf5; border-radius:1.5rem; padding:1rem; border:1px solid #ede3cf; }
+        .character-card { background:white; margin:0.8rem 0; padding:0.8rem; border-radius:1rem; cursor:pointer; border-left:5px solid #ce1126; transition:0.1s; touch-action:manipulation; }
+        .character-card.selected { background:#ffecb3; border-left-color:#002a8f; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+        .character-name { font-weight:bold; font-size:1rem; }
+        .character-desc { font-size:0.8rem; color:#4a5568; }
+        .topic-selector { margin:1rem 0; }
+        select, textarea { width:100%; padding:0.6rem; border-radius:2rem; border:1px solid #dbc6a0; font-family:inherit; font-size:0.9rem; background:white; }
+        textarea { border-radius:1rem; resize:vertical; }
+        button { background:#1e40af; color:white; border:none; padding:0.6rem 1rem; border-radius:2rem; font-weight:bold; cursor:pointer; margin:0.5rem 0; width:100%; font-size:clamp(0.8rem,3.5vw,0.9rem); transition:0.2s; touch-action:manipulation; }
+        button:active { transform:scale(0.96); }
+        .ia-feedback { background:#e9f0fa; border-radius:1rem; padding:0.8rem; margin-top:1rem; font-size:0.9rem; border-left:4px solid #ce1126; }
+        .history { background:#fef7e8; border-radius:1rem; padding:0.8rem; margin-top:1rem; max-height:220px; overflow-y:auto; font-size:0.85rem; }
+        footer { background:#1e2f3c; color:#cddce9; text-align:center; padding:0.9rem; font-size:0.75rem; }
+        .game-nav { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin:1rem; padding-top:0.5rem; border-top:1px solid #ccc; }
+        .game-nav button { background:#1e40af; width:auto; margin:0; padding:0.4rem 1rem; font-size:0.8rem; }
+        @media (max-width:750px){ .game-area { flex-direction:column; } }
+        @media (orientation:landscape) and (max-height:550px){ .history { max-height:140px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎓 Debate: Educación en la independencia</h1>
+        <p>Martí, Maceo y Mariana Grajales discuten sobre la enseñanza en tiempos de lucha. Asume su voz y defiende su postura educativa.</p>
+    </div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (2 personajes · 1 tema)</button>
+        <button class="level-btn" data-level="1">📘 Normal (3 personajes · 2 temas)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (3 personajes · 3 temas)</button>
+    </div>
+    <div class="game-area">
+        <div class="characters-panel">
+            <h3>🎭 Personajes</h3>
+            <div id="charactersList"></div>
+            <div class="topic-selector">
+                <label>📖 Tema educativo:</label>
+                <select id="topicSelect"></select>
+            </div>
+        </div>
+        <div class="debate-panel">
+            <h3>✍️ Tu intervención (como el personaje)</h3>
+            <textarea id="argumentInput" rows="4" placeholder="Escribe aquí tu discurso sobre la educación en la independencia..."></textarea>
+            <button id="submitBtn">🤖 Enviar y recibir análisis IA</button>
+            <div id="iaFeedback" class="ia-feedback">💡 La IA evaluará tu argumento desde la perspectiva histórico‑educativa.</div>
+            <div class="history" id="historyLog"><p><em>Historial del debate</em></p></div>
+        </div>
+    </div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_19.html'">◀ Anterior</button>
+        <button onclick="location.href='index.html'">✨ Completado</button>
+    </div>
+    <footer>✨ Basado en el ideario martiano, maceísta y el legado de Mariana Grajales · IA didáctica · Escuelas Pedagógicas</footer>
+</div>
+
+<script>
+    const personajesBase = [
+        { name: "José Martí", desc: "Apóstol, poeta y pedagogo.", postura: "La educación debe formar ciudadanos libres, cultos y comprometidos con la patria." },
+        { name: "Antonio Maceo", desc: "Titán de Bronce, lugarteniente general.", postura: "La educación en el campamento forja el carácter del soldado: disciplina, ejemplo y valor." },
+        { name: "Mariana Grajales", desc: "Madre de la Patria, formó a sus hijos en la lucha.", postura: "La educación comienza en el hogar, con valores, fe y sacrificio por la independencia." }
+    ];
+
+    const temasPorNivel = {
+        0: ["¿Cuál es el papel de la escuela en la formación de patriotas?"],
+        1: ["¿Cómo debe educarse a los niños para que amen la patria sin caer en adoctrinamiento?", "¿Qué valores debe transmitir la escuela a los futuros ciudadanos de una república independiente?"],
+        2: ["¿Qué valores debe transmitir la escuela a los futuros ciudadanos de una república independiente?", "¿Cómo influye la educación en la prevención de la tiranía y la corrupción?", "¿Debe la educación priorizar la formación técnica o la humanística en una nación en desarrollo?"]
+    };
+
+    const keywordsPorTema = {
+        "¿Cuál es el papel de la escuela en la formación de patriotas?": ["escuela","patriota","formación","valores","nación"],
+        "¿Cómo debe educarse a los niños para que amen la patria sin caer en adoctrinamiento?": ["niños","patria","libertad","pensamiento crítico","adoctrinamiento"],
+        "¿Qué valores debe transmitir la escuela a los futuros ciudadanos de una república independiente?": ["valores","ciudadanos","república","ética","responsabilidad"],
+        "¿Cómo influye la educación en la prevención de la tiranía y la corrupción?": ["tiranía","corrupción","prevención","justicia","transparencia"],
+        "¿Debe la educación priorizar la formación técnica o la humanística en una nación en desarrollo?": ["técnica","humanística","desarrollo","ciencias","humanidades"]
+    };
+
+    let currentLevel = 0;
+    let currentPersonajes = [];
+    let currentTemas = [];
+    let selectedCharacterIndex = 0;
+    let selectedTopicIndex = 0;
+    let historyEntries = [];
+
+    const charactersListDiv = document.getElementById('charactersList');
+    const topicSelect = document.getElementById('topicSelect');
+    const argumentInput = document.getElementById('argumentInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const iaFeedbackDiv = document.getElementById('iaFeedback');
+    const historyLogDiv = document.getElementById('historyLog');
+
+    function loadLevel(level) {
+        if (level === 0) {
+            currentPersonajes = personajesBase.slice(0,2);
+            currentTemas = [...temasPorNivel[0]];
+        } else if (level === 1) {
+            currentPersonajes = [...personajesBase];
+            currentTemas = [...temasPorNivel[1]];
+        } else {
+            currentPersonajes = [...personajesBase];
+            currentTemas = [...temasPorNivel[2]];
+        }
+        selectedCharacterIndex = 0;
+        selectedTopicIndex = 0;
+        renderCharacters();
+        renderTopics();
+        updateUiFromSelection();
+        historyEntries = [];
+        renderHistory();
+        iaFeedbackDiv.innerHTML = "💡 Selecciona un personaje y un tema educativo, luego redacta tu discurso. La IA te dará retroalimentación histórica.";
+    }
+
+    function renderCharacters() {
+        charactersListDiv.innerHTML = '';
+        currentPersonajes.forEach((ch, idx) => {
+            const div = document.createElement('div');
+            div.className = `character-card ${idx === selectedCharacterIndex ? 'selected' : ''}`;
+            div.innerHTML = `<div class="character-name">${ch.name}</div><div class="character-desc">${ch.desc}</div>`;
+            div.addEventListener('click', () => {
+                selectedCharacterIndex = idx;
+                renderCharacters();
+                updateUiFromSelection();
+            });
+            charactersListDiv.appendChild(div);
+        });
+    }
+
+    function renderTopics() {
+        topicSelect.innerHTML = '';
+        currentTemas.forEach((tema, idx) => {
+            const option = document.createElement('option');
+            option.value = idx;
+            option.textContent = tema;
+            if (idx === selectedTopicIndex) option.selected = true;
+            topicSelect.appendChild(option);
+        });
+        topicSelect.addEventListener('change', (e) => {
+            selectedTopicIndex = parseInt(e.target.value);
+            updateUiFromSelection();
+        });
+    }
+
+    function updateUiFromSelection() {
+        const character = currentPersonajes[selectedCharacterIndex];
+        const tema = currentTemas[selectedTopicIndex];
+        iaFeedbackDiv.innerHTML = `📖 Tema: "${tema}". Defiende la postura educativa de ${character.name}: "${character.postura}"`;
+    }
+
+    function addHistory(speaker, message) {
+        historyEntries.unshift(`📌 ${speaker}: ${message.substring(0, 280)}`);
+        if (historyEntries.length > 12) historyEntries.pop();
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (historyEntries.length === 0) { historyLogDiv.innerHTML = '<p><em>Historial del debate</em></p>'; return; }
+        historyLogDiv.innerHTML = historyEntries.map(entry => `<p>${entry}</p>`).join('');
+    }
+
+    function analyzeArgument() {
+        const argumento = argumentInput.value.trim();
+        if (argumento === "") { iaFeedbackDiv.innerHTML = "❌ Escribe tu discurso antes de enviarlo."; return; }
+        const character = currentPersonajes[selectedCharacterIndex];
+        const tema = currentTemas[selectedTopicIndex];
+        const lowerArg = argumento.toLowerCase();
+        const keywords = keywordsPorTema[tema] || ["educación","independencia","valores","patria"];
+        let matched = keywords.filter(kw => lowerArg.includes(kw)).length;
+        let analysis = "";
+
+        if (matched >= keywords.length * 0.6) {
+            analysis = `✅ Excelente intervención. Has usado conceptos clave como ${keywords.slice(0,3).join(', ')} y reflejas bien la postura de ${character.name}: "${character.postura}". La IA considera que tu argumento tiene coherencia histórica y pedagógica.`;
+        } else if (matched > 0) {
+            analysis = `⚠️ Buen intento. Mencionaste ${matched} de ${keywords.length} conceptos relevantes. Para fortalecer tu postura, profundiza en: ${keywords.join(', ')}. ${character.name} sostenía: "${character.postura}".`;
+        } else {
+            analysis = `🔄 Tu argumento no refleja claramente la postura educativa de ${character.name}. Te sugerimos incorporar términos como ${keywords.join(', ')} y relacionarlos con el contexto de independencia. Recuerda que ${character.name} defendía: "${character.postura}".`;
+        }
+        analysis += `<br><br>🎯 En un debate sobre educación e independencia, es fundamental conectar la enseñanza con la formación de ciudadanos libres y comprometidos. ¡Sigue reflexionando!`;
+        iaFeedbackDiv.innerHTML = analysis;
+        addHistory(`🧑‍🏫 Estudiante (como ${character.name})`, argumento);
+        addHistory(`🤖 IA (retroalimentación educativa)`, analysis.replace(/<br>/g, ' '));
+        argumentInput.value = "";
+    }
+
+    function setLevel(level) {
+        currentLevel = level;
+        loadLevel(level);
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            if (parseInt(btn.getAttribute('data-level')) === level) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        adaptativeScreen();
+    }
+
+    submitBtn.addEventListener('click', analyzeArgument);
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLevel(parseInt(btn.getAttribute('data-level'))));
+    });
+
+    function adaptativeScreen() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        if (width < 480) document.body.style.padding = '0.6rem';
+        else if (width < 768) document.body.style.padding = '1rem';
+        else document.body.style.padding = '1.5rem';
+        const history = document.querySelector('.history');
+        if (history && height < 550 && width > height) history.style.maxHeight = '140px';
+        else if (history) history.style.maxHeight = '220px';
+    }
+    window.addEventListener('resize', adaptativeScreen);
+    window.addEventListener('orientationchange', () => setTimeout(adaptativeScreen, 30));
+
+    setLevel(0);
+    adaptativeScreen();
+</script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Glosario académico · Literatura, historia y gramática de Cuba</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #eef2f7;
+            font-family: 'Segoe UI', Roboto, system-ui, 'Noto Sans', sans-serif;
+            padding: clamp(0.75rem, 3vw, 1.5rem);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border-top: 6px solid #ce1126;
+            border-bottom: 6px solid #002a8f;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f, #0f2c44);
+            color: white;
+            padding: 1.2rem clamp(1rem, 4vw, 2rem);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.3rem, 6vw, 1.9rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .header span {
+            background: #d4af37;
+            padding: 0.2rem 1rem;
+            border-radius: 60px;
+            font-size: clamp(0.7rem, 3vw, 1rem);
+            color: #1e3a5f;
+        }
+
+        .controls {
+            background: #f8fafc;
+            padding: 1rem clamp(1rem, 4vw, 2rem);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-family: inherit;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: #e2e8f0;
+            color: #1e293b;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: clamp(0.7rem, 3.5vw, 0.85rem);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #ce1126;
+            color: white;
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+            color: #2c5282;
+            font-weight: 500;
+        }
+
+        .glossary-area {
+            padding: 1.5rem clamp(1rem, 4vw, 2rem);
+            min-height: 500px;
+        }
+
+        .term-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .term-card {
+            background: #fef9ef;
+            border-radius: 1.2rem;
+            border-left: 5px solid #ce1126;
+            padding: 1rem;
+            transition: 0.1s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .term-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1e3a5f;
+            margin-bottom: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .category-badge {
+            background: #002a8f;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.65rem;
+            font-weight: normal;
+        }
+
+        .definition {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #2d3748;
+            margin: 0.5rem 0;
+        }
+
+        .example {
+            background: #f0f4fa;
+            padding: 0.4rem 0.7rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            color: #2c5282;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            background: #f1f5f9;
+            border-radius: 1.5rem;
+            color: #475569;
+        }
+
+        .back-button {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .back-button a {
+            display: inline-block;
+            background: #1e3a5f;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .back-button a:hover {
+            background: #ce1126;
+        }
+
+        footer {
+            background: #1e2f3c;
+            color: #cddce9;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 640px) {
+            .term-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📚 Glosario de estudio <span>Literatura · Gramática · Historia de Cuba</span></h1>
+        <p>Más de 180 conceptos extraídos de los juegos educativos. Filtra por categoría o busca palabras clave.</p>
+    </div>
+    <div class="controls">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Buscar término, autor o definición...">
+        <div class="filter-buttons" id="filterContainer">
+            <button class="filter-btn active" data-cat="all">📌 Todos</button>
+            <button class="filter-btn" data-cat="Figuras literarias">🎭 Figuras literarias</button>
+            <button class="filter-btn" data-cat="Movimientos literarios">📖 Movimientos</button>
+            <button class="filter-btn" data-cat="Gramática y ortografía">✍️ Gramática</button>
+            <button class="filter-btn" data-cat="Autores cubanos">🖋️ Autores cubanos</button>
+            <button class="filter-btn" data-cat="Personajes históricos">🏛️ Personajes históricos</button>
+            <button class="filter-btn" data-cat="Eventos históricos">📅 Eventos históricos</button>
+            <button class="filter-btn" data-cat="Conceptos históricos">🇨🇺 Conceptos históricos</button>
+            <button class="filter-btn" data-cat="Documentos históricos">📜 Documentos</button>
+            <button class="filter-btn" data-cat="Símbolos patrios">⭐ Símbolos patrios</button>
+            <button class="filter-btn" data-cat="Debates y posturas">🗣️ Debates / posturas</button>
+        </div>
+        <div class="stats" id="stats">Cargando glosario...</div>
+        <div class="back-button">
+            <a href="index.html">🏠 Volver al índice de juegos</a>
+        </div>
+    </div>
+    <div class="glossary-area" id="glossaryArea">
+        <div class="term-grid" id="termGrid"></div>
+    </div>
+    <footer>🤖 IA educativa · Glosario sin conexión · Basado en más de 20 ejercicios interactivos · Escuelas Pedagógicas</footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    //  GLOSARIO ARGUMENTADO Y COMPLETO (mismo contenido que el original)
+    // --------------------------------------------------------------
+    const terminos = [
+        // ---------- FIGURAS LITERARIAS ----------
+        { term: "Metáfora", category: "Figuras literarias", definition: "Identificación directa entre dos términos (uno real y otro imaginario) que comparten una cualidad. Es la figura más poderosa de la poesía porque crea realidades nuevas.", example: "Sus cabellos son oro. (El color o brillo del cabello se equipara al metal precioso)" },
+        { term: "Personificación", category: "Figuras literarias", definition: "Otorgar rasgos humanos (acciones, sentimientos o lenguaje) a entes inanimados, animales o ideas abstractas. Humaniza la naturaleza y da fuerza expresiva.", example: "El viento susurraba secretos al oído de los pinos." },
+        { term: "Símil / Comparación", category: "Figuras literarias", definition: "Establece una relación de semejanza explícita mediante nexos como 'como', 'cual' o 'parece'. Permite visualizar lo abstracto a través de lo cotidiano.", example: "Brillaba como el sol en el horizonte matutino." },
+        { term: "Hipérbole", category: "Figuras literarias", definition: "Exageración intencional que busca un efecto emocional, humorístico o patético. Refuerza una idea al llevarla a extremos irreales.", example: "Te he llamado mil veces y nunca contestaste." },
+        { term: "Ironía", category: "Figuras literarias", definition: "Expresar lo contrario de lo que realmente se piensa, con un tono burlón o crítico. Provoca un desdoblamiento entre el sentido literal y el real.", example: "¡Qué bonito día! (dicho durante un diluvio)" },
+        { term: "Anáfora", category: "Figuras literarias", definition: "Repetición deliberada de una o varias palabras al inicio de versos o frases para crear ritmo, énfasis y cohesión emocional.", example: "¡Oh noche que guiaste! ¡Oh noche amable! (San Juan de la Cruz)" },
+        { term: "Retruécano", category: "Figuras literarias", definition: "Juego de palabras que invierte el orden de los términos en una misma oración, produciendo un efecto ingenioso o reflexivo.", example: "No hay camino, se hace camino al andar. (Antonio Machado)" },
+        { term: "Aliteración", category: "Figuras literarias", definition: "Repetición de sonidos consonánticos (o vocálicos) para sugerir sensaciones acústicas y reforzar el significado.", example: "El susurro del viento entre las ramas secas." },
+        { term: "Epíteto", category: "Figuras literarias", definition: "Adjetivo ornamental que resalta una cualidad inherente al sustantivo, a menudo innecesaria pero bellamente expresiva.", example: "blanca nieve, verde campo, dulce miel." },
+        { term: "Hipérbaton", category: "Figuras literarias", definition: "Alteración del orden gramatical estándar de las palabras para darle mayor musicalidad, suspense o énfasis.", example: "Del salón en el ángulo oscuro, de su dueña tal vez olvidada. (Gustavo Adolfo Bécquer)" },
+        { term: "Paradoja", category: "Figuras literarias", definition: "Unión de ideas opuestas que en apariencia se contradicen pero encierran una verdad profunda o sorprendente.", example: "Vivo sin vivir en mí, y tan alta vida espero que muero porque no muero. (Santa Teresa)" },
+        { term: "Onomatopeya", category: "Figuras literarias", definition: "Palabra cuya forma fónica imita el sonido natural que designa. Aporta realismo sensorial al texto.", example: "tic tac, guau, crac, pío-pío." },
+        { term: "Apóstrofe", category: "Figuras literarias", definition: "Interpelación vehemente a un ser presente, ausente, imaginario o a una idea abstracta, como si pudiera responder.", example: "¡Oh, muerte, ven silenciosa, que no quiero ver más luz!" },
+        { term: "Eufemismo", category: "Figuras literarias", definition: "Sustitución de una palabra o expresión tabú, violenta o desagradable por otra más suave o tolerable socialmente.", example: "pasar a mejor vida (en lugar de morrir)." },
+        { term: "Sínestesia", category: "Figuras literarias", definition: "Atribución de una sensación propia de un sentido a otro (oír colores, ver sonidos). Enriquece la percepción poética.", example: "sabor amargo del adiós, un grito verde." },
+        { term: "Metonimia", category: "Figuras literarias", definition: "Designar una cosa con el nombre de otra con la que mantiene una relación de causa-efecto, continente-contenido o autor-obra.", example: "Leer a Cervantes (sus obras)." },
+        { term: "Sinécdoque", category: "Figuras literarias", definition: "Tipo de metonimia que designa el todo por la parte, la parte por el todo, o la especie por el género.", example: "La ciudad entera lo supo (los habitantes)." },
+        { term: "Antítesis", category: "Figuras literarias", definition: "Contraposición de dos palabras, frases o ideas de significado opuesto para realzar el conflicto o la complejidad.", example: "El amor es tan corto y el olvido tan largo. (Pablo Neruda)" },
+        { term: "Asíndeton", category: "Figuras literarias", definition: "Omisión intencional de conjunciones para dar dinamismo, rapidez y sensación de acumulación desbordante.", example: "Llegué, vi, vencí. (Julio César)" },
+        { term: "Polisíndeton", category: "Figuras literarias", definition: "Repetición excesiva de conjunciones para crear una sensación de lentitud, abundancia o énfasis emocional.", example: "¡Y corre, y vuela, y grita, y arde de furia!" },
+
+        // ---------- MOVIMIENTOS LITERARIOS ----------
+        { term: "Romanticismo", category: "Movimientos literarios", definition: "Movimiento cultural del siglo XIX que exalta la libertad individual, la subjetividad, la naturaleza salvaje y los sentimientos intensos frente a la razón ilustrada.", example: "Poesía de José María Heredia: 'En medio del océano'." },
+        { term: "Modernismo", category: "Movimientos literarios", definition: "Renovación estética hispanoamericana que buscaba la belleza absoluta, el exotismo y la independencia del verso; Rubén Darío y José Martí son sus máximos exponentes.", example: "Azul... de Rubén Darío y 'Versos sencillos' de Martí." },
+        { term: "Barroco", category: "Movimientos literarios", definition: "Estilo recargado del siglo XVII que utiliza metáforas complejas, hipérbaton y contrastes extremos (desengaño, fugacidad de la vida).", example: "Soledades de Góngora, conceptismo de Quevedo." },
+        { term: "Vanguardismo", category: "Movimientos literarios", definition: "Conjunto de movimientos rupturistas del siglo XX (surrealismo, dadaísmo, futurismo) que rechazan la tradición y exploran lo irracional.", example: "El ultraísmo en España con Guillermo de Torre." },
+        { term: "Realismo", category: "Movimientos literarios", definition: "Corriente que busca representar la realidad de manera objetiva, con personajes comunes y crítica social, especialmente en la novela del siglo XIX.", example: "Benito Pérez Galdós: 'Fortunata y Jacinta'." },
+        { term: "Naturalismo", category: "Movimientos literarios", definition: "Extensión radical del realismo que aplica el determinismo biológico y social: el entorno y la herencia condicionan al individuo.", example: "Émile Zola: 'Germinal'." },
+        { term: "Simbolismo", category: "Movimientos literarios", definition: "Estilo poético que sugiere realidades profundas a través de símbolos, colores, musicalidad y misterio; prefiere la evocación a la descripción.", example: "Baudelaire: 'Las flores del mal'." },
+        { term: "Existencialismo", category: "Movimientos literarios", definition: "Corriente que aborda la angustia, la libertad y la responsabilidad humanas en un mundo sin sentido trascendente.", example: "Jean-Paul Sartre: 'La náusea', Albert Camus: 'El extranjero'." },
+        { term: "Surrealismo", category: "Movimientos literarios", definition: "Movimiento que busca expresar el funcionamiento del pensamiento sin control de la razón, mediante la escritura automática y lo onírico.", example: "André Breton: 'Manifiesto surrealista'." },
+        { term: "Neobarroco", category: "Movimientos literarios", definition: "Relectura del barroco en el siglo XX, con lenguaje exuberante, hipérbaton y referencias cultas; muy presente en la literatura cubana.", example: "José Lezama Lima: 'Paradiso'." },
+
+        // ---------- GRAMÁTICA Y ORTOGRAFÍA ----------
+        { term: "Sustantivo común", category: "Gramática y ortografía", definition: "Designa personas, animales u objetos de forma genérica, sin individualizarlos; es la base del léxico cotidiano.", example: "libro, ciudad, perro, esperanza." },
+        { term: "Sustantivo propio", category: "Gramática y ortografía", definition: "Identifica de manera única a un ser, lugar o entidad; se escribe con mayúscula inicial y no suele llevar determinantes.", example: "José, La Habana, Everest, Amazonía." },
+        { term: "Sustantivo abstracto", category: "Gramática y ortografía", definition: "Nombra conceptos, ideas, sentimientos o cualidades que no pueden percibirse por los sentidos, esenciales para el pensamiento.", example: "libertad, justicia, melancolía, esperanza." },
+        { term: "Sustantivo colectivo", category: "Gramática y ortografía", definition: "En singular designa un conjunto homogéneo de seres u objetos, lo que permite economía lingüística.", example: "bosque (árboles), rebaño (ovejas), ejército (soldados)." },
+        { term: "Adjetivo calificativo", category: "Gramática y ortografía", definition: "Expresa una cualidad o propiedad del sustantivo, ya sea concreta o abstracta; admite grados comparativo y superlativo.", example: "alto, rojo, inteligente, dulce." },
+        { term: "Adjetivo posesivo", category: "Gramática y ortografía", definition: "Indica pertenencia o posesión con respecto a las personas gramaticales; concuerda en número con el objeto poseído.", example: "mi, tu, su, nuestro, vuestro, su." },
+        { term: "Verbo regular", category: "Gramática y ortografía", definition: "Mantiene la raíz invariable y sigue las desinencias del modelo de conjugación (amar, temer, partir).", example: "amar (amo, amas, amó); saltar." },
+        { term: "Verbo irregular", category: "Gramática y ortografía", definition: "Al conjugarse modifica su raíz o sus desinencias, no se ajusta a los paradigmas regulares.", example: "ser (soy, eres, fui), ir, tener, poner." },
+        { term: "Modo indicativo", category: "Gramática y ortografía", definition: "Expresa hechos reales, objetivos o seguros; sitúa la acción en el tiempo (presente, pasado, futuro).", example: "Yo estudio todas las mañanas." },
+        { term: "Modo subjuntivo", category: "Gramática y ortografía", definition: "Expresa deseos, dudas, probabilidades o acciones hipotéticas; casi siempre va subordinado a otro verbo.", example: "Espero que estudies para el examen." },
+        { term: "Modo imperativo", category: "Gramática y ortografía", definition: "Expresa mandato, ruego o consejo directo; carece de primera persona del singular.", example: "¡Estudia con dedicación!" },
+        { term: "Palabra aguda", category: "Gramática y ortografía", definition: "Lleva el acento prosódico en la última sílaba; se tildan cuando terminan en -n, -s o vocal.", example: "café, reloj, canción, estrés." },
+        { term: "Palabra grave (llana)", category: "Gramática y ortografía", definition: "La sílaba tónica es la penúltima; llevan tilde si no terminan en -n, -s o vocal.", example: "árbol, fácil, lápiz, almíbar." },
+        { term: "Palabra esdrújula", category: "Gramática y ortografía", definition: "El acento recae en la antepenúltima sílaba; todas llevan tilde sin excepción.", example: "pájaro, médico, teléfono, esdrújula." },
+        { term: "Uso de la coma", category: "Gramática y ortografía", definition: "Signo de puntuación que indica una pausa breve; separa elementos de una enumeración, vocativos, incisos y evita ambigüedades.", example: "Los niños, los ancianos y los jóvenes esperan." },
+
+        // ---------- AUTORES CUBANOS ----------
+        { term: "José Martí", category: "Autores cubanos", definition: "Poeta, ensayista, periodista y héroe nacional. Fundador del Partido Revolucionario Cubano y autor intelectual de la Guerra del 95. Su obra fusiona modernismo y compromiso ético.", example: "Cultivo una rosa blanca / en enero como en mayo. (Versos sencillos)" },
+        { term: "Nicolás Guillén", category: "Autores cubanos", definition: "Poeta de la negritud y la reivindicación afrocubana; incorporó ritmos del son, la rumba y el lenguaje popular para denunciar el racismo.", example: "Motivos de son, Sóngoro cosongo, El son entero." },
+        { term: "Dulce María Loynaz", category: "Autores cubanos", definition: "Poetisa intimista de verso lírico y hondo simbolismo; Premio Cervantes 1992, su obra maestra 'Jardín' explora el amor y la soledad.", example: "Jardín (novela poemática)." },
+        { term: "Alejo Carpentier", category: "Autores cubanos", definition: "Novelista, musicólogo y ensayista. Acuñó el concepto de 'lo real maravilloso' y renovó la narrativa histórica latinoamericana.", example: "El reino de este mundo (sobre la Revolución haitiana)." },
+        { term: "José Lezama Lima", category: "Autores cubanos", definition: "Poeta y novelista neobarroco, creador de un sistema poético personal (la 'sucesiva heredad'). Su novela 'Paradiso' es cumbre de la literatura cubana.", example: "Paradiso, La expresión americana." },
+        { term: "Nancy Morejón", category: "Autores cubanos", definition: "Poeta afrocubana contemporánea; su obra 'Mujer negra' se ha convertido en un ícono de la identidad y la resistencia femenina.", example: "Mujer negra / resucito en la esperanza." },
+        { term: "Gertrudis Gómez de Avellaneda", category: "Autores cubanos", definition: "Escritora romántica, precursora del feminismo literario. Abordó la pasión, la libertad y el dolor del exilio.", example: "Al partir (soneto emblemático)." },
+
+        // ---------- PERSONAJES HISTÓRICOS ----------
+        { term: "Carlos Manuel de Céspedes", category: "Personajes históricos", definition: "Padre de la Patria, iniciador del Grito de Yara (1868) y primer presidente de la República en Armas. Simboliza la decisión ética de liberar a sus esclavos para luchar por la independencia.", example: "El 10 de octubre de 1868 dio la libertad a sus esclavos y los convocó a la guerra." },
+        { term: "Antonio Maceo", category: "Personajes históricos", definition: "Titán de Bronce, lugarteniente general del Ejército Libertador. Férreo opositor al Pacto del Zanjón (Protesta de Baraguá). Murió combatiendo sin claudicar.", example: "Protesta de Baraguá: 'No aceptamos la paz sin independencia'." },
+        { term: "Máximo Gómez", category: "Personajes históricos", definition: "Generalísimo del Ejército Libertador, estratega dominicano-cubano. Diseñó la Invasión de Oriente a Occidente (1895), campaña decisiva para la independencia.", example: "La Invasión: 1500 hombres cruzaron la trocha de Júcaro a Morón." },
+        { term: "Mariana Grajales", category: "Personajes históricos", definition: "Madre de la Patria, mujer de extraordinaria abnegación que formó a sus hijos (Maceo entre ellos) en el ideario independentista. Símbolo del sacrificio maternal.", example: "Atendió heridos en campaña y alentó la resistencia." },
+        { term: "Camilo Cienfuegos", category: "Personajes históricos", definition: "Comandante rebelde, héroe de la Revolución Cubana. Conocido como 'El Señor de la Vanguardia' por su audacia militar y lealtad a Fidel Castro.", example: "Vas bien, Fidel (frase pronunciada durante la entrada a La Habana)." },
+        { term: "Frank País", category: "Personajes históricos", definition: "Líder del Movimiento 26 de Julio en Santiago de Cuba. Organizó el alzamiento del 30 de noviembre de 1956. Asesinado a los 22 años, se convirtió en mártir.", example: "Morir por la patria es vivir (epígrafe de su legado)." },
+        { term: "Félix Varela", category: "Personajes históricos", definition: "Filósofo, sacerdote y educador, precursor intelectual de la independencia cubana. Enseñó la libertad desde la cátedra y el periodismo.", example: "La educación es el arte de hacer humanos." },
+
+        // ---------- EVENTOS HISTÓRICOS ----------
+        { term: "Grito de Yara", category: "Eventos históricos", definition: "Inicio de la Guerra de los Diez Años (1868). Carlos Manuel de Céspedes se levantó en La Demajagua y lanzó el manifiesto revolucionario. Primer intento sostenido de independencia.", example: "El 10 de octubre de 1868 se alzó contra España." },
+        { term: "Pacto del Zanjón", category: "Eventos históricos", definition: "Tratado que puso fin a la Guerra de los Diez Años sin lograr la independencia ni la abolición de la esclavitud (1878). Generó enorme descontento.", example: "Antonio Maceo lo rechazó con la Protesta de Baraguá." },
+        { term: "Protesta de Baraguá", category: "Eventos históricos", definition: "Rechazo público de Antonio Maceo al Pacto del Zanjón el 15 de marzo de 1878. Afirmó que la guerra continuaría hasta la independencia total.", example: "Maceo rompió su sable contra un árbol en señal de protesta." },
+        { term: "Guerra Chiquita", category: "Eventos históricos", definition: "Segundo conflicto independentista (1879-1880), liderado por Calixto García. Breve y reprimido, pero mantuvo viva la llama revolucionaria.", example: "Calvario (poema de José Martí inspirado en esta guerra)." },
+        { term: "Grito de Baire", category: "Eventos históricos", definition: "Reinicio de la guerra independentista el 24 de febrero de 1895, organizado por José Martí, Máximo Gómez y Antonio Maceo. Inicio de la Guerra Necesaria.", example: "Martí escribió: 'Nueva y revolucionaria es la guerra que hoy comienza'." },
+        { term: "Muerte de José Martí", category: "Eventos históricos", definition: "El Apóstol cae en combate en Dos Ríos, el 19 de mayo de 1895. Su muerte fue un golpe moral pero fortaleció la determinación independentista.", example: "Golpe al independentismo que unificó más la lucha." },
+        { term: "Muerte de Antonio Maceo", category: "Eventos históricos", definition: "El Titán de Bronce muere en San Pedro (provincia de La Habana) el 7 de diciembre de 1896, junto a su ayudante Panchito Gómez Toro.", example: "Pérdida irreparable para el Ejército Libertador." },
+        { term: "Intervención norteamericana", category: "Eventos históricos", definition: "EE. UU. interviene en Cuba en 1898 tras la explosión del acorazado Maine. Impide la entrada del Ejército Libertador a Santiago y establece un gobierno militar.", example: "Fin del dominio español pero inicio del neocolonialismo y la Enmienda Platt." },
+        { term: "Constitución de 1940", category: "Eventos históricos", definition: "Carta Magna progresista, considerada una de las más avanzadas del mundo: estableció el sufragio femenino, la educación gratuita, derechos laborales y la función social de la propiedad.", example: "Voto femenino, derecho a la huelga, límite a la propiedad latifundista." },
+        { term: "Triunfo de la Revolución", category: "Eventos históricos", definition: "Entrada de las tropas rebeldes del Ejército Rebelde a La Habana el 1 de enero de 1959, tras la huida de Fulgencio Batista. Fin de la dictadura e inicio de una nueva etapa política.", example: "Camilo Cienfuegos y Fidel Castro lideraron la llegada a la capital." },
+
+        // ---------- CONCEPTOS HISTÓRICOS ----------
+        { term: "Independencia", category: "Conceptos históricos", definition: "Separación política y jurídica del dominio español, alcanzada tras tres guerras independentistas (1868-1898). No fue plena debido a la intervención estadounidense.", example: "Guerras de independencia: Diez Años, Guerra Chiquita, Guerra del 95." },
+        { term: "República", category: "Conceptos históricos", definition: "Forma de gobierno sin monarquía, proclamada el 20 de mayo de 1902 bajo la tutela de la Enmienda Platt. Soberanía limitada por EE. UU.", example: "Primera intervención estadounidense (1898-1902) y gobierno de Tomás Estrada Palma." },
+        { term: "Soberanía", category: "Conceptos históricos", definition: "Poder supremo de un Estado para gobernarse sin injerencia externa. Los independentistas cubanos lucharon por ella, pero fue recortada por la Enmienda Platt y el Tratado de Relaciones.", example: "Autodeterminación como principio martiano." },
+        { term: "Abolición", category: "Conceptos históricos", definition: "Fin de la esclavitud en Cuba. Se decretó en 1886 mediante la Ley de Patronato (1880) y la abolición final. Fue un proceso gradual presionado por los independentistas.", example: "Ley de Patronato: ocho años de 'patronato' antes de la libertad plena." },
+        { term: "Colonia", category: "Conceptos históricos", definition: "Período de dominio español desde 1492 hasta 1898. Se caracterizó por una economía de plantación esclavista, estructura social rígida y marginación del criollo.", example: "Régimen colonial con capitanes generales y monopolio comercial." },
+        { term: "Mambí", category: "Conceptos históricos", definition: "Soldado cubano del Ejército Libertador que luchó por la independencia. El término proviene de un líder independentista dominicano y fue adoptado con orgullo.", example: "Ejército Libertador: 'mambises' eran sinónimo de valentía." },
+        { term: "Bloqueo", category: "Conceptos históricos", definition: "Embargo económico, comercial y financiero impuesto por Estados Unidos a Cuba desde 1960 (vigente aún). Considerado un acto de guerra económica.", example: "Crisis de los misiles (1962) endureció el bloqueo." },
+        { term: "Alfabetización", category: "Conceptos históricos", definition: "Campaña Nacional de Alfabetización (1961) que logró reducir el analfabetismo del 23,6% a 3,9% en un año. Movilizó a más de 100.000 brigadistas.", example: "Conrado Benítez (primer alfabetizador caído)." },
+
+        // ---------- DOCUMENTOS HISTÓRICOS ----------
+        { term: "Constitución de Guáimaro", category: "Documentos históricos", definition: "Primera Constitución de la República en Armas (10 de abril de 1869). Estableció la separación de poderes, la abolición de la esclavitud (no aplicada) y la anexión de Camagüey y Oriente.", example: "Gobierno cubano durante la Guerra de los Diez Años." },
+        { term: "Manifiesto de Montecristi", category: "Documentos históricos", definition: "Programa político de la Guerra Necesaria, redactado por José Martí y Máximo Gómez el 25 de marzo de 1895. Proclamaba la guerra sin odio y la independencia total.", example: "Bases de la independencia: 'No es guerra contra el español, sino contra el sistema colonial'." },
+        { term: "Enmienda Platt", category: "Documentos históricos", definition: "Enmienda impuesta por EE. UU. a la Constitución cubana de 1901. Permitía la intervención militar estadounidense, el arrendamiento de bases (Guantánamo) y vetaba tratados con otras potencias.", example: "Limitación de soberanía que rigió hasta 1934 (abrogada parcialmente)." },
+        { term: "Programa del Moncada", category: "Documentos históricos", definition: "Plataforma política presentada por Fidel Castro en su defensa 'La historia me absolverá' (1953). Basada en la Constitución de 1940: reforma agraria, participación obrera, nacionalización de servicios públicos.", example: "Reforma agraria y derechos sociales como ejes." },
+
+        // ---------- SÍMBOLOS PATRIOS ----------
+        { term: "Bandera de Cuba", category: "Símbolos patrios", definition: "La Estrella Solitaria diseñada por Narciso López y Miguel Teurbe Tolón (1850). Las tres franjas azules representan los tres departamentos coloniales; las dos blancas la pureza; el triángulo rojo la sangre y la igualdad; la estrella la libertad.", example: "Tres franjas azules, dos blancas, triángulo rojo y estrella blanca." },
+        { term: "Escudo de Cuba", category: "Símbolos patrios", definition: "Diseñado por Miguel Teurbe Tolón (1849). Presenta un castillo (fortaleza), una llave (posición geográfica) y un sol naciente (el nuevo Estado).", example: "Castillo, llave y sol naciente sobre fondo de palma real." },
+        { term: "Himno Nacional", category: "Símbolos patrios", definition: "La Bayamesa, compuesto por Pedro 'Perucho' Figueredo (1868). Nació en medio de la toma de Bayamo. Sus versos incitan al combate por la independencia.", example: "¡Al combate, corred, bayameses, que la patria os contempla orgullosa!" },
+        { term: "Palma real", category: "Símbolos patrios", definition: "Árbol nacional (Roystonea regia). Simboliza la resistencia, la elegancia y la identidad del paisaje cubano. Aparece en el escudo nacional.", example: "Presente en el escudo y en la vegetación típica de Cuba." },
+        { term: "Tocororo", category: "Símbolos patrios", definition: "Ave nacional endémica (Priotelus temnurus). Sus plumas presentan los colores de la bandera: rojo, azul y blanco. Representa la libertad insular.", example: "Colores rojo, azul y blanco en su plumaje." },
+        { term: "Mariposa", category: "Símbolos patrios", definition: "Flor nacional (Hedychium coronarium), blanca, fragante y silvestre. Simboliza la pureza, la paz y la belleza de la mujer cubana.", example: "Símbolo de pureza y resistencia silvestre." },
+        { term: "Guayabera", category: "Símbolos patrios", definition: "Prenda tradicional cubana, de origen campesino, usada como símbolo de elegancia tropical. Refleja la identidad y la cultura popular.", example: "Elegancia tropical en eventos formales e informales." },
+
+        // ---------- DEBATES Y POSTURAS ----------
+        { term: "Independencia inmediata", category: "Debates y posturas", definition: "Postura independentista radical que rechazaba cualquier pacto o autonomía con España. Fue defendida por Carlos Manuel de Céspedes y especialmente por Antonio Maceo.", example: "Carlos Manuel de Céspedes y la Protesta de Baraguá como emblema." },
+        { term: "Autonomía pactada", category: "Debates y posturas", definition: "Propuesta de algunos sectores criollos de conformarse con autonomía política dentro del imperio español, sin separación total. Defendida por el Partido Liberal Autonomista.", example: "Partido Liberal Autonomista (Rafael Montoro)." },
+        { term: "Educación patriótica", category: "Debates y posturas", definition: "Idea martiana de formar ciudadanos libres, cultos y comprometidos con la patria. La educación es la base de la independencia real y la justicia social.", example: "Ser cultos es ser libres (José Martí)." },
+        { term: "Educación en valores", category: "Debates y posturas", definition: "Enseñar ética, responsabilidad, solidaridad y amor a la patria como eje del sistema educativo. Mariana Grajales personifica ese ideal con su ejemplo familiar.", example: "Mariana Grajales: forjó el carácter de sus hijos mambises." }
+    ];
+
+    // ---------- DOM Elements ----------
+    const searchInput = document.getElementById('searchInput');
+    const filterContainer = document.getElementById('filterContainer');
+    const termGrid = document.getElementById('termGrid');
+    const statsSpan = document.getElementById('stats');
+
+    let activeCategory = "all";
+    let searchTerm = "";
+
+    function renderGlossary() {
+        const filtered = terminos.filter(item => {
+            const matchCat = activeCategory === "all" || item.category === activeCategory;
+            const matchSearch = searchTerm === "" || 
+                item.term.toLowerCase().includes(searchTerm) || 
+                item.definition.toLowerCase().includes(searchTerm) ||
+                (item.example && item.example.toLowerCase().includes(searchTerm)) ||
+                (item.category && item.category.toLowerCase().includes(searchTerm));
+            return matchCat && matchSearch;
+        });
+
+        statsSpan.innerHTML = `📚 ${filtered.length} términos encontrados de ${terminos.length}`;
+
+        if (filtered.length === 0) {
+            termGrid.innerHTML = `<div class="empty-message">✨ No hay coincidencias. Prueba con otra palabra o categoría.</div>`;
+            return;
+        }
+
+        termGrid.innerHTML = filtered.map(item => `
+            <div class="term-card">
+                <div class="term-title">
+                    <span>${escapeHtml(item.term)}</span>
+                    <span class="category-badge">${escapeHtml(item.category)}</span>
+                </div>
+                <div class="definition">📖 ${escapeHtml(item.definition)}</div>
+                ${item.example ? `<div class="example">✍️ Ejemplo: ${escapeHtml(item.example)}</div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    function initFilters() {
+        const btns = document.querySelectorAll('.filter-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cat = btn.getAttribute('data-cat');
+                activeCategory = cat;
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderGlossary();
+            });
+        });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        searchTerm = e.target.value.trim().toLowerCase();
+        renderGlossary();
+    });
+
+    function init() {
+        initFilters();
+        renderGlossary();
+    }
+
+    init();
+</script>
+</body>
+</html>

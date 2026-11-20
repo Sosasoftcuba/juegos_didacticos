@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Ejercicio 3 · Flashcards de gramática · Verdadero o Falso</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { background:#eef2f7; font-family:'Segoe UI',Roboto,sans-serif; padding:clamp(0.75rem,3vw,1.5rem); min-height:100vh; display:flex; justify-content:center; align-items:center; }
+        .container { max-width:1100px; width:100%; background:white; border-radius:2rem; box-shadow:0 25px 45px -12px rgba(0,0,0,0.3); overflow:hidden; border-top:6px solid #ce1126; border-bottom:6px solid #002a8f; }
+        .header { background:linear-gradient(135deg,#1e3a5f,#0f2c44); color:white; padding:1.2rem clamp(1rem,4vw,2rem); text-align:center; }
+        .header h1 { font-size:clamp(1.3rem,6vw,1.9rem); }
+        .level-bar { padding:0.8rem clamp(1rem,3vw,2rem); display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:center; background:#f4f7fc; }
+        .level-btn { padding:0.4rem 1rem; font-size:clamp(0.7rem,3.5vw,0.9rem); border:none; border-radius:2rem; cursor:pointer; font-weight:bold; background:#e2e8f0; }
+        .level-btn.active { background:#ce1126; color:white; }
+        .game-area { padding:1.5rem clamp(1rem,3vw,2rem); }
+        .vf-area { display:flex; flex-direction:column; align-items:center; }
+        .card-wrapper { perspective:1200px; width:100%; max-width:700px; margin:0 auto 1.5rem; height:clamp(300px,50vh,450px); cursor:pointer; }
+        .flashcard { position:relative; width:100%; height:100%; transition:transform 0.5s; transform-style:preserve-3d; border-radius:1.5rem; }
+        .flipped { transform:rotateY(180deg); }
+        .front,.back { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:1.5rem; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1rem; text-align:center; box-shadow:0 8px 20px rgba(0,0,0,0.1); overflow-y:auto; }
+        .front { background:linear-gradient(135deg,#fff,#fef7e0); border:3px solid #ce1126; }
+        .back { background:linear-gradient(135deg,#f0f5ff,#fff); border:3px solid #002a8f; transform:rotateY(180deg); justify-content:space-evenly; }
+        .term { font-size:clamp(1.3rem,6vw,2rem); font-weight:bold; color:#1e3a5f; }
+        .emoji { font-size:clamp(2rem,8vw,3.5rem); }
+        .definition,.example,.statement { width:100%; margin:0.4rem 0; font-size:clamp(0.75rem,3.5vw,1rem); }
+        .statement { font-weight:bold; background:#eef2ff; padding:0.7rem; border-radius:1rem; }
+        .vf-buttons { display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap; justify-content:center; }
+        .vf-btn { background:#2c5282; padding:0.6rem 1.2rem; border-radius:2rem; font-weight:bold; cursor:pointer; border:none; color:white; }
+        .vf-btn.true { background:#2e8b57; }
+        .vf-btn.false { background:#9b2c1d; }
+        .nav-controls { display:flex; gap:1rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
+        button { background:#2c5282; color:white; border:none; padding:0.6rem 1.2rem; border-radius:2rem; font-weight:bold; cursor:pointer; }
+        .counter { background:#1e3a5f; padding:0.4rem 1.2rem; border-radius:2rem; color:white; }
+        .feedback { background:#f0f4fa; border-radius:1.2rem; padding:1rem; margin:1rem 0; }
+        .score { background:#2c5282; color:white; padding:0.3rem 1rem; border-radius:2rem; display:inline-block; }
+        footer { background:#1e2f3c; color:#cddce9; text-align:center; padding:0.9rem; font-size:0.75rem; }
+        .game-nav { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin:1rem; padding-top:0.5rem; border-top:1px solid #ccc; }
+        .game-nav button { background:#2c5282; width:auto; margin:0; padding:0.4rem 1rem; font-size:0.8rem; }
+        @media (max-width:550px){ .card-wrapper { height:clamp(280px,45vh,400px); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header"><h1>📘 Gramática: Verdadero o Falso · Flashcards</h1><p>Voltea la tarjeta y decide si la afirmación es verdadera o falsa.</p></div>
+    <div class="level-bar" id="levelBar">
+        <button class="level-btn active" data-level="0">🌟 Fácil (20)</button>
+        <button class="level-btn" data-level="1">📘 Normal (40)</button>
+        <button class="level-btn" data-level="2">🔥 Difícil (60)</button>
+    </div>
+    <div class="game-area"><div class="vf-area"><div class="card-wrapper" id="cardWrapper"><div class="flashcard" id="flashcard"><div class="front"><div class="emoji" id="frontEmoji">📖</div><div class="term" id="frontTerm">Cargando...</div><div class="definition" id="frontDef"></div><div class="example" id="frontEx"></div><div style="font-size:0.75rem;">💡 Haz clic para voltear</div></div><div class="back"><div class="statement" id="statementText"></div><div class="vf-buttons"><button class="vf-btn true" id="trueBtn">✅ Verdadero</button><button class="vf-btn false" id="falseBtn">❌ Falso</button></div></div></div></div><div class="nav-controls"><button id="prevCard">◀ Anterior</button><span class="counter" id="cardCounter">1 / 20</span><button id="nextCard">Siguiente ▶</button></div><div class="feedback" id="vfFeedback">🤖 IA: El anverso contiene la información verdadera. Voltea y juzga.</div><div class="score" id="vfScore">Aciertos: 0 / 0</div></div></div>
+    <div class="game-nav">
+        <button onclick="location.href='index.html'">🏠 Volver al inicio</button>
+        <button onclick="location.href='Juego_02.html'">◀ Anterior</button>
+        <button onclick="location.href='Juego_04.html'">Siguiente ▶</button>
+    </div>
+    <footer>🤖 IA educativa · Reglas gramaticales: sustantivos, adjetivos, verbos, etc.</footer>
+</div>
+<script>
+    const todasLasTarjetas = [
+        { emoji:"📚", term:"Sustantivo común", definition:"Nombra personas, animales u objetos de forma general.", example:"libro, ciudad", statement:"Los sustantivos comunes siempre se escriben con mayúscula inicial.", isStatementTrue:false },
+        { emoji:"⭐", term:"Sustantivo propio", definition:"Identifica a un ser o lugar específico.", example:"José, La Habana", statement:"Los sustantivos propios se escriben con mayúscula inicial.", isStatementTrue:true },
+        { emoji:"✋", term:"Sustantivo concreto", definition:"Designa elementos que se pueden percibir con los sentidos.", example:"mesa, perfume", statement:"Los sustantivos concretos no se pueden tocar ni ver.", isStatementTrue:false },
+        { emoji:"💭", term:"Sustantivo abstracto", definition:"Nombra ideas, sentimientos o conceptos.", example:"libertad, esperanza", statement:"El amor es un sustantivo abstracto.", isStatementTrue:true },
+        { emoji:"🌳", term:"Sustantivo individual", definition:"Designa un solo ser en singular.", example:"árbol, oveja", statement:"El sustantivo 'bosque' es individual.", isStatementTrue:false },
+        { emoji:"🌲🌲", term:"Sustantivo colectivo", definition:"En singular designa un conjunto.", example:"bosque, rebaño", statement:"'Rebaño' es un sustantivo colectivo.", isStatementTrue:true },
+        { emoji:"🎨", term:"Adjetivo calificativo", definition:"Expresa cualidad del sustantivo.", example:"alto, rojo", statement:"Los adjetivos calificativos pueden ir antes o después del sustantivo.", isStatementTrue:true },
+        { emoji:"🏛️", term:"Adjetivo relacional", definition:"Indica relación o pertenencia.", example:"social, político", statement:"El adjetivo relacional admite grados de comparación.", isStatementTrue:false },
+        { emoji:"👤", term:"Adjetivo posesivo", definition:"Indica posesión.", example:"mi, tu, su", statement:"'Mi', 'tu' y 'su' son adjetivos posesivos.", isStatementTrue:true },
+        { emoji:"👉", term:"Adjetivo demostrativo", definition:"Señala distancia.", example:"este, ese, aquel", statement:"'Este' indica lejanía respecto al hablante.", isStatementTrue:false },
+        { emoji:"❓", term:"Adjetivo indefinido", definition:"Expresa cantidad imprecisa.", example:"algún, varios", statement:"Los indefinidos siempre se colocan después del sustantivo.", isStatementTrue:false },
+        { emoji:"📏", term:"Grado positivo", definition:"Cualidad sin intensidad.", example:"Juan es alto.", statement:"El grado positivo expresa la cualidad en su máximo nivel.", isStatementTrue:false },
+        { emoji:"⚖️", term:"Grado comparativo", definition:"Compara cualidades entre dos elementos.", example:"más alto que", statement:"El comparativo puede ser de superioridad, inferioridad o igualdad.", isStatementTrue:true },
+        { emoji:"🔝", term:"Grado superlativo", definition:"Cualidad en máximo grado.", example:"altísimo", statement:"El superlativo solo se forma con el sufijo '-ísimo'.", isStatementTrue:false },
+        { emoji:"🏃", term:"Verbo", definition:"Expresa acción o estado.", example:"correr, ser", statement:"El verbo es el núcleo del predicado.", isStatementTrue:true },
+        { emoji:"📏", term:"Verbo regular", definition:"Mantiene la raíz invariable.", example:"amar", statement:"El verbo 'tener' es regular.", isStatementTrue:false },
+        { emoji:"🔄", term:"Verbo irregular", definition:"Cambia la raíz o desinencias.", example:"ser", statement:"El verbo 'ir' es irregular.", isStatementTrue:true },
+        { emoji:"✅", term:"Modo indicativo", definition:"Expresa hechos reales.", example:"Yo estudio.", statement:"El modo indicativo expresa deseos o dudas.", isStatementTrue:false },
+        { emoji:"❓", term:"Modo subjuntivo", definition:"Expresa duda o posibilidad.", example:"Espero que estudies.", statement:"El subjuntivo se usa para hechos objetivos.", isStatementTrue:false },
+        { emoji:"📢", term:"Modo imperativo", definition:"Expresa mandato o ruego.", example:"¡Estudia!", statement:"El imperativo tiene formas para todas las personas gramaticales.", isStatementTrue:false }
+    ];
+    const nivelesData = { 0:{ cards:todasLasTarjetas.slice(0,20) }, 1:{ cards:todasLasTarjetas.slice(0,40) }, 2:{ cards:todasLasTarjetas.slice(0,60) } };
+    let currentLevel=0, currentSet=[], currentIndex=0, isFlipped=false, score=0, answered=false, totalCards=0;
+    const cardWrapper=document.getElementById('cardWrapper'), flashcard=document.getElementById('flashcard'), frontEmoji=document.getElementById('frontEmoji'), frontTerm=document.getElementById('frontTerm'), frontDef=document.getElementById('frontDef'), frontEx=document.getElementById('frontEx'), statementText=document.getElementById('statementText'), trueBtn=document.getElementById('trueBtn'), falseBtn=document.getElementById('falseBtn'), vfFeedback=document.getElementById('vfFeedback'), vfScoreSpan=document.getElementById('vfScore'), cardCounterSpan=document.getElementById('cardCounter'), prevBtn=document.getElementById('prevCard'), nextBtn=document.getElementById('nextCard');
+    function updateCardUI(){ const card=currentSet[currentIndex]; frontEmoji.textContent=card.emoji; frontTerm.textContent=card.term; frontDef.innerHTML=`<strong>📖 Definición:</strong> ${card.definition}`; frontEx.innerHTML=`<strong>✍️ Ejemplo:</strong> ${card.example}`; statementText.innerHTML=`🔍 "${card.statement}"`; cardCounterSpan.innerText=`${currentIndex+1} / ${totalCards}`; if(isFlipped){ flashcard.classList.remove('flipped'); isFlipped=false; } answered=false; vfFeedback.innerHTML="Voltea la tarjeta y decide."; trueBtn.disabled=false; falseBtn.disabled=false; }
+    function flipCard(){ if(!isFlipped && !answered){ flashcard.classList.add('flipped'); isFlipped=true; } else if(isFlipped && !answered){ vfFeedback.innerHTML="Responde primero."; } }
+    function checkAnswer(selectedBool){ if(!isFlipped){ vfFeedback.innerHTML="Primero voltea la tarjeta."; return; } if(answered){ vfFeedback.innerHTML="Ya respondiste."; return; } const correct=currentSet[currentIndex].isStatementTrue; const isCorrect=(selectedBool===correct); if(isCorrect){ score++; vfFeedback.innerHTML=`✅ Correcto. La afirmación era ${correct?"VERDADERA":"FALSA"}.`; } else { vfFeedback.innerHTML=`❌ Incorrecto. La afirmación es ${correct?"VERDADERA":"FALSA"}.`; } answered=true; updateScore(); trueBtn.disabled=true; falseBtn.disabled=true; }
+    function updateScore(){ vfScoreSpan.innerText=`Aciertos: ${score} / ${totalCards}`; }
+    function nextCard(){ if(!answered && currentIndex<totalCards-1){ vfFeedback.innerHTML="Responde la actual primero."; return; } if(currentIndex<totalCards-1){ currentIndex++; updateCardUI(); } else { if(!answered && currentIndex===totalCards-1) vfFeedback.innerHTML="Responde la última."; else vfFeedback.innerHTML=`🎉 Completaste el nivel.`; } }
+    function prevCard(){ if(currentIndex>0){ currentIndex--; updateCardUI(); } else vfFeedback.innerHTML="Primera tarjeta."; }
+    function resetLevel(level){ currentLevel=level; currentSet=nivelesData[level].cards; totalCards=currentSet.length; currentIndex=0; score=0; answered=false; isFlipped=false; if(flashcard.classList.contains('flipped')) flashcard.classList.remove('flipped'); updateCardUI(); updateScore(); vfFeedback.innerHTML=`🤖 Nivel cargado.`; trueBtn.disabled=false; falseBtn.disabled=false; }
+    function setLevel(level){ resetLevel(level); document.querySelectorAll('.level-btn').forEach(btn=>{ if(parseInt(btn.dataset.level)===level) btn.classList.add('active'); else btn.classList.remove('active'); }); adaptativeScreen(); }
+    trueBtn.addEventListener('click',()=>checkAnswer(true)); falseBtn.addEventListener('click',()=>checkAnswer(false)); cardWrapper.addEventListener('click',flipCard); prevBtn.addEventListener('click',prevCard); nextBtn.addEventListener('click',nextCard); document.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>setLevel(parseInt(btn.dataset.level))));
+    function adaptativeScreen(){ const w=window.innerWidth, h=window.innerHeight; document.body.style.padding = w<480?'0.6rem':(w<768?'1rem':'1.5rem'); const cw=document.querySelector('.card-wrapper'); if(cw) cw.style.height = (h<550 && w>h)?'min(250px,42vh)':(w<400?'clamp(240px,50vh,380px)':''); }
+    window.addEventListener('resize',adaptativeScreen); window.addEventListener('orientationchange',()=>setTimeout(adaptativeScreen,30));
+    setLevel(0); adaptativeScreen();
+</script>
+</body>
+</html>
